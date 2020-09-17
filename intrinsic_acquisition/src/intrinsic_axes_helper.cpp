@@ -8,15 +8,19 @@
 
 #define BUTTON_SIZE 50
 
+//Mapping globals
 std::string x_map = "x+";
 std::string y_map = "y+";
 std::string z_map = "z+";
 
+//Persistent image for control panel
 cv::Mat control_panel;
 
+//Persistent data for loading and saving.
 std::string file_path;
 YAML::Node data_file;
 
+//Gets images from camera, draws axes on them, and displays stuff.
 void new_frame_CB(const sensor_msgs::Image::ConstPtr & im){
 	//Get the new image.
 	cv::Mat img;
@@ -199,6 +203,7 @@ void new_frame_CB(const sensor_msgs::Image::ConstPtr & im){
 	cv::waitKey(1);
 }
 
+//Drawing function for the control panel.
 void cp_draw(){
 	//Save bar.
 	cv::putText(
@@ -384,7 +389,9 @@ void cp_draw(){
 		cv::Scalar(0, 0, 0)
 	);
 }
+//GUI RESPONSE FUNCTIONS
 
+//Called when the save button is clicked.
 void save_behavior(){
 	if(file_path.empty()){
 		ROS_WARN("No TDF argument given. Saving is disabled.");
@@ -407,6 +414,7 @@ void save_behavior(){
 	printf("to file %s.\n", file_path.c_str());
 }
 
+//Called to change the +/- component of the axes.
 void pm_behavior(std::string * element){
 	if((*element)[1] == '+'){
 		(*element)[1] = '-';
@@ -416,6 +424,7 @@ void pm_behavior(std::string * element){
 	cp_draw();
 }
 
+//Called to change the x y z component of the axes.
 void xyz_behavior(std::string * element){
 	if((*element)[0] == 'x'){
 		(*element)[0] = 'z';
@@ -427,16 +436,19 @@ void xyz_behavior(std::string * element){
 	cp_draw();
 }
 
+//Head callback that routes control clicks.
 void control_click_cb(int event, int x, int y, int flags, void* param){
 	if(event != cv::EVENT_LBUTTONDOWN){//We only want left down clicks.
 		return;
 	}
 	
+	//If near the top of the window we must be over the save button.
 	if(y < BUTTON_SIZE){
 		save_behavior();
 		return;
 	}
 	
+	//Otherwise figure out which row we are in
 	std::string * operand;
 	if(y > BUTTON_SIZE && y < BUTTON_SIZE * 2){
 		operand = &x_map;
@@ -446,6 +458,7 @@ void control_click_cb(int event, int x, int y, int flags, void* param){
 		operand = &z_map;
 	}
 	
+	//And which column.
 	if(x > BUTTON_SIZE && x < BUTTON_SIZE * 2){
 		pm_behavior(operand);
 	} else if(x > BUTTON_SIZE * 2){
@@ -459,17 +472,19 @@ int main(int argc, char ** argv){
 	ros::init(argc, argv, "axis_helper");
 	ros::NodeHandle nh;
 
+	//Arg dimensions check.
 	if(argc < 2){
 		ROS_ERROR("USAGE: rosrun intrinsic_axis_helper /camera/topic [/path/to/ADF]");
 		return 0;
 	}
 	
+	//Load data from file if possible.
 	if(argc < 3){
 		ROS_WARN("No TDF argument given. Saving will be disabled and default values will be used.");
 		file_path = "";
 	} else{
 		file_path = std::string(argv[2]);
-		try{
+		try{//Assuming file exists and is well-formed, load defaults.
 			data_file = YAML::LoadFile(file_path);
 			
 			if(!data_file["sled_x"]){
@@ -521,7 +536,7 @@ int main(int argc, char ** argv){
 			}
 			ROS_INFO("Successfully initialized mappings from TDF.");
 				
-		} catch(YAML::BadFile e){
+		} catch(YAML::BadFile e){//If file is not extant and well-formed...
 			ROS_WARN("TDF \"%s\" does not exist or does not contain valid axis mapping values. Default values will be created.", file_path.c_str());
 			data_file["sled_x"] = x_map;
 			data_file["sled_y"] = y_map;
@@ -530,17 +545,21 @@ int main(int argc, char ** argv){
 		
 	}
 	
+	//Create visualization
 	cv::namedWindow("Camera and Axes");
 	
+	//Create control panel
 	cv::namedWindow("Controls");
 	control_panel = cv::Mat(BUTTON_SIZE * 4, BUTTON_SIZE * 3, CV_8UC3, cv::Scalar(0, 0, 0));
 	cp_draw();
 	cv::setMouseCallback("Controls", control_click_cb);
 	
+	//Subscribe to image.
 	ros::Subscriber imsub = nh.subscribe(argv[1], 1, new_frame_CB);
 	
 	ROS_INFO("Axis helper has subscribed to %s and is waiting for images.", argv[1]);
 	
+	//Good to go.
 	ros::spin();
 	
 	cv::destroyAllWindows();

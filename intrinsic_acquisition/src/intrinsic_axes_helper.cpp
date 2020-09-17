@@ -19,9 +19,69 @@ void new_frame_CB(const sensor_msgs::Image::ConstPtr & im){
 		ROS_ERROR("Could not convert from encoding to 'bgr8'.");
 		return;
 	}
+	
+	//Calculate some generally useful elements
+	int u_max = img.cols;
+	int v_max = img.rows;
+	
+	int u_center = u_max / 2;
+	int v_center = v_max / 2;
+	
+	int tenth = std::min(u_max, v_max) / 10;
+	
+	//Draw the camera frame
+	cv::arrowedLine(
+		img,
+		cv::Point(u_center, v_center),
+		cv::Point(u_center + tenth, v_center),
+		cv::Scalar(0, 0, 200),//BGR for some reason
+		2//Thickness
+	);
+	cv::putText(
+		img,
+		"Camera X",
+		cv::Point(u_center + tenth, v_center),
+		cv::FONT_HERSHEY_COMPLEX,
+		0.5,//Font size
+		cv::Scalar(0, 0, 200)
+	);
+	
+	cv::arrowedLine(
+		img,
+		cv::Point(u_center, v_center),
+		cv::Point(u_center, v_center + tenth),
+		cv::Scalar(0, 200, 0),//BGR for some reason
+		2//Thickness
+	);
+	cv::putText(
+		img,
+		"Camera Y",
+		cv::Point(u_center + 10, v_center + tenth),
+		cv::FONT_HERSHEY_COMPLEX,
+		0.5,//Font size
+		cv::Scalar(0, 200, 0)
+	);
+	
+	cv::arrowedLine(
+		img,
+		cv::Point(u_center, v_center),
+		cv::Point(u_center - tenth / 4, v_center - tenth / 4),
+		cv::Scalar(200, 0, 0),//BGR for some reason
+		2//Thickness
+	);
+	cv::putText(
+		img,
+		"Camera Z",
+		cv::Point(u_center - tenth / 4, v_center - tenth / 4),
+		cv::FONT_HERSHEY_COMPLEX,
+		0.5,//Font size
+		cv::Scalar(200, 0, 0)
+	);
 
 	//Show the image with the things drawn on it.
 	cv::imshow("Camera and Axes", img);
+	//For some reason. image won't display unless there is a nominal wait
+	//time between imshow() and the end of the function.
 	cv::waitKey(1);
 }
 

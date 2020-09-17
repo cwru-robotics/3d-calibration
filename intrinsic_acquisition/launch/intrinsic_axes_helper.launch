@@ -1,0 +1,14 @@
+<launch>
+	<arg
+		name="path"
+		default="$(find intrinsic_acquisition)/data/task_description.yml"
+		doc="Path to look for Test Description File (if it exists) either read or save axis mapping."
+	/>
+	<arg
+		name="topic"
+		default="/camera/image_raw_color"
+		doc="Topic name for camera images."
+	/>
+	
+	<node name="axes_helper" pkg="intrinsic_acquisition" type="intrinsic_axes_helper" args="$(arg topic)" output="screen"/>
+</launch>

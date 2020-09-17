@@ -1,0 +1,6 @@
+target_x: 5
+target_y: 5
+sled_x: x-
+sled_y: y+
+sled_z: z+
+target_spacing: 0.0348488

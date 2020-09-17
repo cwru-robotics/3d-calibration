@@ -4,6 +4,8 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 
+#include "yaml-cpp/yaml.h"
+
 #define BUTTON_SIZE 50
 
 std::string x_map = "x+";
@@ -13,6 +15,7 @@ std::string z_map = "z+";
 cv::Mat control_panel;
 
 std::string file_path;
+YAML::Node data_file;
 
 void new_frame_CB(const sensor_msgs::Image::ConstPtr & im){
 	//Get the new image.
@@ -383,7 +386,25 @@ void cp_draw(){
 }
 
 void save_behavior(){
-	ROS_ERROR("SAVING IS NOT YET IMPLEMENTED");
+	if(file_path.empty()){
+		ROS_WARN("No TDF argument given. Saving is disabled.");
+		return;
+	}
+	
+	data_file["sled_x"] = x_map;
+	data_file["sled_y"] = y_map;
+	data_file["sled_z"] = z_map;
+	
+	std::ofstream e_out;
+	e_out.open(file_path);
+	e_out << data_file;
+	e_out.close();
+	
+	printf("Saved map \n");
+	printf("\tsled_x: %s\n", x_map.c_str());
+	printf("\tsled_y: %s\n", y_map.c_str());
+	printf("\tsled_z: %s\n", z_map.c_str());
+	printf("to file %s.\n", file_path.c_str());
 }
 
 void pm_behavior(std::string * element){
@@ -443,13 +464,78 @@ int main(int argc, char ** argv){
 		return 0;
 	}
 	
+	if(argc < 3){
+		ROS_WARN("No TDF argument given. Saving will be disabled and default values will be used.");
+		file_path = "";
+	} else{
+		file_path = std::string(argv[2]);
+		try{
+			data_file = YAML::LoadFile(file_path);
+			
+			if(!data_file["sled_x"]){
+				ROS_WARN("TDF \"%s\" does not contain a sled_x value.", file_path.c_str());
+				throw YAML::BadFile();
+			}
+			if(!data_file["sled_y"]){
+				ROS_WARN("TDF \"%s\" does not contain a sled_y value.", file_path.c_str());
+				throw YAML::BadFile();
+			}
+			if(!data_file["sled_z"]){
+				ROS_WARN("TDF \"%s\" does not contain a sled_z value.", file_path.c_str());
+				throw YAML::BadFile();
+			}
+			
+			std::string candidate;
+			candidate = data_file["sled_x"].as<std::string>();
+			if(
+				candidate.length() != 2 ||
+				(candidate[0] != 'x' && candidate[0] != 'y' && candidate[0] != 'z') ||
+				(candidate[1] != '+' && candidate[1] != '-')
+			){
+				ROS_WARN("Imparisble sled_x value \"%s\".", candidate.c_str());
+				throw YAML::BadFile();
+			} else{
+				x_map = candidate;
+			}
+			candidate = data_file["sled_y"].as<std::string>();
+			if(
+				candidate.length() != 2 ||
+				(candidate[0] != 'x' && candidate[0] != 'y' && candidate[0] != 'z') ||
+				(candidate[1] != '+' && candidate[1] != '-')
+			){
+				ROS_WARN("Imparisble sled_y value \"%s\".", candidate.c_str());
+				throw YAML::BadFile();
+			} else{
+				y_map = candidate;
+			}
+			candidate = data_file["sled_z"].as<std::string>();
+			if(
+				candidate.length() != 2 ||
+				(candidate[0] != 'x' && candidate[0] != 'y' && candidate[0] != 'z') ||
+				(candidate[1] != '+' && candidate[1] != '-')
+			){
+				ROS_WARN("Imparisble sled_z value \"%s\".", candidate.c_str());
+				throw YAML::BadFile();
+			} else{
+				z_map = candidate;
+			}
+			ROS_INFO("Successfully initialized mappings from TDF.");
+				
+		} catch(YAML::BadFile e){
+			ROS_WARN("TDF \"%s\" does not exist or does not contain valid axis mapping values. Default values will be created.", file_path.c_str());
+			data_file["sled_x"] = x_map;
+			data_file["sled_y"] = y_map;
+			data_file["sled_z"] = z_map;
+		}
+		
+	}
+	
 	cv::namedWindow("Camera and Axes");
 	
 	cv::namedWindow("Controls");
 	control_panel = cv::Mat(BUTTON_SIZE * 4, BUTTON_SIZE * 3, CV_8UC3, cv::Scalar(0, 0, 0));
 	cp_draw();
 	cv::setMouseCallback("Controls", control_click_cb);
-	
 	
 	ros::Subscriber imsub = nh.subscribe(argv[1], 1, new_frame_CB);
 	

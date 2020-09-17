@@ -10,5 +10,11 @@
 		doc="Topic name for camera images."
 	/>
 	
-	<node name="axes_helper" pkg="intrinsic_acquisition" type="intrinsic_axes_helper" args="$(arg topic)" output="screen"/>
+	<node
+		name="axes_helper"
+		pkg="intrinsic_acquisition"
+		type="intrinsic_axes_helper"
+		args="$(arg topic) $(arg path)"
+		output="screen"
+	/>
 </launch>

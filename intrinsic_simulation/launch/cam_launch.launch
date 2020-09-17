@@ -1,0 +1,22 @@
+<launch>
+	<!--env name="GAZEBO_MODEL_PATH" value="$(find roadprintz_camera_eval)/model"/>
+	<env name="GAZEBO_MODEL_PATH" value="$(find roadprintz_camera_eval)/props"/-->
+
+	<include file="$(find gazebo_ros)/launch/empty_world.launch"/>
+	
+	<!--Spawn the hand-on-wheels-->
+	<!--TODO Change this to our custom model-->
+	<param
+		name="robot_description"
+		command="
+			$(find xacro)/xacro
+			'$(find intrinsic_simulation)/urdf/camera.urdf'
+			--inorder
+		"
+	/>
+	<node
+		name="spawn_model" pkg="gazebo_ros"
+		type="spawn_model" output="screen"
+		args="-param robot_description -urdf -model cam"
+	/>
+</launch>

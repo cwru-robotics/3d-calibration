@@ -30,17 +30,26 @@ void new_frame_CB(const sensor_msgs::Image::ConstPtr & im){
 	int tenth = std::min(u_max, v_max) / 10;
 	
 	//Draw the camera frame
+	cv::Point p_x = cv::Point( tenth, 0);
+	cv::Point n_x = cv::Point(-tenth, 0);
+	cv::Point p_y = cv::Point(0,  tenth);
+	cv::Point n_y = cv::Point(0, -tenth);
+	cv::Point p_z = cv::Point(-tenth / 4, -tenth / 4);
+	cv::Point n_z = cv::Point( tenth / sqrt(2),  tenth / sqrt(2));
+	
+	cv::Point c_origin = cv::Point(u_center, v_center);
+	
 	cv::arrowedLine(
 		img,
-		cv::Point(u_center, v_center),
-		cv::Point(u_center + tenth, v_center),
+		c_origin,
+		c_origin + p_x,
 		cv::Scalar(0, 0, 200),//BGR for some reason
 		2//Thickness
 	);
 	cv::putText(
 		img,
 		"Camera X",
-		cv::Point(u_center + tenth, v_center),
+		c_origin + p_x,
 		cv::FONT_HERSHEY_COMPLEX,
 		0.5,//Font size
 		cv::Scalar(0, 0, 200)
@@ -48,15 +57,15 @@ void new_frame_CB(const sensor_msgs::Image::ConstPtr & im){
 	
 	cv::arrowedLine(
 		img,
-		cv::Point(u_center, v_center),
-		cv::Point(u_center, v_center + tenth),
+		c_origin,
+		c_origin + p_y,
 		cv::Scalar(0, 200, 0),//BGR for some reason
 		2//Thickness
 	);
 	cv::putText(
 		img,
 		"Camera Y",
-		cv::Point(u_center + 10, v_center + tenth),
+		c_origin + p_y,
 		cv::FONT_HERSHEY_COMPLEX,
 		0.5,//Font size
 		cv::Scalar(0, 200, 0)
@@ -64,19 +73,20 @@ void new_frame_CB(const sensor_msgs::Image::ConstPtr & im){
 	
 	cv::arrowedLine(
 		img,
-		cv::Point(u_center, v_center),
-		cv::Point(u_center - tenth / 4, v_center - tenth / 4),
+		c_origin,
+		c_origin + p_z,
 		cv::Scalar(200, 0, 0),//BGR for some reason
 		2//Thickness
 	);
 	cv::putText(
 		img,
 		"Camera Z",
-		cv::Point(u_center - tenth / 4, v_center - tenth / 4),
+		c_origin + p_z,
 		cv::FONT_HERSHEY_COMPLEX,
 		0.5,//Font size
 		cv::Scalar(200, 0, 0)
 	);
+	
 
 	//Show the image with the things drawn on it.
 	cv::imshow("Camera and Axes", img);

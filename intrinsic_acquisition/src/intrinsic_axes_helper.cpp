@@ -87,6 +87,100 @@ void new_frame_CB(const sensor_msgs::Image::ConstPtr & im){
 		cv::Scalar(200, 0, 0)
 	);
 	
+	//Draw the motion frame
+	cv::Point cam_x_terminus;
+	cv::Point cam_y_terminus;
+	cv::Point cam_z_terminus;
+	
+	if(x_map[1] == '+'){
+		switch(x_map[0]){
+			case 'x': cam_x_terminus = p_x; break;
+			case 'y': cam_x_terminus = p_y; break;
+			case 'z': cam_x_terminus = p_z; break;
+		}
+	} else {
+		switch(x_map[0]){
+			case 'x': cam_x_terminus = n_x; break;
+			case 'y': cam_x_terminus = n_y; break;
+			case 'z': cam_x_terminus = n_z; break;
+		}
+	}
+	if(y_map[1] == '+'){
+		switch(y_map[0]){
+			case 'x': cam_y_terminus = p_x; break;
+			case 'y': cam_y_terminus = p_y; break;
+			case 'z': cam_y_terminus = p_z; break;
+		}
+	} else {
+		switch(y_map[0]){
+			case 'x': cam_y_terminus = n_x; break;
+			case 'y': cam_y_terminus = n_y; break;
+			case 'z': cam_y_terminus = n_z; break;
+		}
+	}
+	if(z_map[1] == '+'){
+		switch(z_map[0]){
+			case 'x': cam_z_terminus = p_x; break;
+			case 'y': cam_z_terminus = p_y; break;
+			case 'z': cam_z_terminus = p_z; break;
+		}
+	} else {
+		switch(z_map[0]){
+			case 'x': cam_z_terminus = n_x; break;
+			case 'y': cam_z_terminus = n_y; break;
+			case 'z': cam_z_terminus = n_z; break;
+		}
+	}
+	
+	cv::Point s_origin = cv::Point(u_center - tenth * 2, v_center - tenth * 2);
+	
+	cv::arrowedLine(
+		img,
+		s_origin,
+		s_origin + cam_x_terminus,
+		cv::Scalar(200, 0, 200),//BGR for some reason
+		2//Thickness
+	);
+	cv::putText(
+		img,
+		"Sled X",
+		s_origin + cam_x_terminus,
+		cv::FONT_HERSHEY_COMPLEX,
+		0.5,//Font size
+		cv::Scalar(200, 0, 200)
+	);
+	
+	cv::arrowedLine(
+		img,
+		s_origin,
+		s_origin + cam_y_terminus,
+		cv::Scalar(0, 200, 200),//BGR for some reason
+		2//Thickness
+	);
+	cv::putText(
+		img,
+		"Sled Y",
+		s_origin + cam_y_terminus,
+		cv::FONT_HERSHEY_COMPLEX,
+		0.5,//Font size
+		cv::Scalar(0, 200, 200)
+	);
+	
+	cv::arrowedLine(
+		img,
+		s_origin,
+		s_origin + cam_z_terminus,
+		cv::Scalar(200, 200, 0),//BGR for some reason
+		2//Thickness
+	);
+	cv::putText(
+		img,
+		"Sled Z",
+		s_origin + cam_z_terminus,
+		cv::FONT_HERSHEY_COMPLEX,
+		0.5,//Font size
+		cv::Scalar(200, 200, 0)
+	);
 
 	//Show the image with the things drawn on it.
 	cv::imshow("Camera and Axes", img);

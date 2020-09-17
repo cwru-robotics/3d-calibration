@@ -382,6 +382,56 @@ void cp_draw(){
 	);
 }
 
+void save_behavior(){
+	ROS_ERROR("SAVING IS NOT YET IMPLEMENTED");
+}
+
+void pm_behavior(std::string * element){
+	if((*element)[1] == '+'){
+		(*element)[1] = '-';
+	} else {
+		(*element)[1] = '+';
+	}
+	cp_draw();
+}
+
+void xyz_behavior(std::string * element){
+	if((*element)[0] == 'x'){
+		(*element)[0] = 'z';
+	} else if((*element)[0] == 'y'){
+		(*element)[0] = 'x';
+	} else{
+		(*element)[0] = 'y';
+	}
+	cp_draw();
+}
+
+void control_click_cb(int event, int x, int y, int flags, void* param){
+	if(event != cv::EVENT_LBUTTONDOWN){//We only want left down clicks.
+		return;
+	}
+	
+	if(y < BUTTON_SIZE){
+		save_behavior();
+		return;
+	}
+	
+	std::string * operand;
+	if(y > BUTTON_SIZE && y < BUTTON_SIZE * 2){
+		operand = &x_map;
+	} else if(y < BUTTON_SIZE * 3){
+		operand = &y_map;
+	} else{
+		operand = &z_map;
+	}
+	
+	if(x > BUTTON_SIZE && x < BUTTON_SIZE * 2){
+		pm_behavior(operand);
+	} else if(x > BUTTON_SIZE * 2){
+		xyz_behavior(operand);
+	}
+}
+
 int main(int argc, char ** argv){
 
 	//ROS initialization
@@ -398,6 +448,7 @@ int main(int argc, char ** argv){
 	cv::namedWindow("Controls");
 	control_panel = cv::Mat(BUTTON_SIZE * 4, BUTTON_SIZE * 3, CV_8UC3, cv::Scalar(0, 0, 0));
 	cp_draw();
+	cv::setMouseCallback("Controls", control_click_cb);
 	
 	
 	ros::Subscriber imsub = nh.subscribe(argv[1], 1, new_frame_CB);

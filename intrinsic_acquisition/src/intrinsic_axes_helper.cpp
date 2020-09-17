@@ -4,9 +4,15 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 
+#define BUTTON_SIZE 50
+
 std::string x_map = "x+";
 std::string y_map = "y+";
 std::string z_map = "z+";
+
+cv::Mat control_panel;
+
+std::string file_path;
 
 void new_frame_CB(const sensor_msgs::Image::ConstPtr & im){
 	//Get the new image.
@@ -184,9 +190,196 @@ void new_frame_CB(const sensor_msgs::Image::ConstPtr & im){
 
 	//Show the image with the things drawn on it.
 	cv::imshow("Camera and Axes", img);
+	cv::imshow("Controls", control_panel);
 	//For some reason. image won't display unless there is a nominal wait
 	//time between imshow() and the end of the function.
 	cv::waitKey(1);
+}
+
+void cp_draw(){
+	//Save bar.
+	cv::putText(
+		control_panel,
+		"SAVE",
+		cv::Point(BUTTON_SIZE, BUTTON_SIZE / 2),
+		cv::FONT_HERSHEY_COMPLEX,
+		0.5,//Font size
+		cv::Scalar(255, 255, 255)
+	);
+	
+	cv::Scalar x_color;
+	if(x_map[0] == 'x'){
+		x_color = cv::Scalar(0, 0, 255);
+	} else if(x_map[0] == 'y'){
+		x_color = cv::Scalar(0, 255, 0);
+	} else{
+		x_color = cv::Scalar(255, 0, 0);
+	}
+	
+	cv::Scalar y_color;
+	if(y_map[0] == 'x'){
+		y_color = cv::Scalar(0, 0, 255);
+	} else if(y_map[0] == 'y'){
+		y_color = cv::Scalar(0, 255, 0);
+	} else{
+		y_color = cv::Scalar(255, 0, 0);
+	}
+	
+	cv::Scalar z_color;
+	if(z_map[0] == 'x'){
+		z_color = cv::Scalar(0, 0, 255);
+	} else if(z_map[0] == 'y'){
+		z_color = cv::Scalar(0, 255, 0);
+	} else{
+		z_color = cv::Scalar(255, 0, 0);
+	}
+	
+	//x bar
+	cv::rectangle(
+		control_panel,
+		cv::Point(0, BUTTON_SIZE),
+		cv::Point(BUTTON_SIZE, BUTTON_SIZE * 2),
+		cv::Scalar(200, 0, 200),
+		cv::FILLED
+	);
+	cv::putText(
+		control_panel,
+		"X",
+		cv::Point(BUTTON_SIZE/4, 3 * BUTTON_SIZE / 2),
+		cv::FONT_HERSHEY_COMPLEX,
+		0.5,//Font size
+		cv::Scalar(0, 0, 0)
+	);
+	
+	cv::rectangle(
+		control_panel,
+		cv::Point(BUTTON_SIZE, BUTTON_SIZE),
+		cv::Point(BUTTON_SIZE * 2, BUTTON_SIZE * 2),
+		x_color / 2,
+		cv::FILLED
+	);
+	cv::putText(
+		control_panel,
+		std::string({x_map[1]}),
+		cv::Point(BUTTON_SIZE + BUTTON_SIZE/4, 3 * BUTTON_SIZE / 2),
+		cv::FONT_HERSHEY_COMPLEX,
+		0.5,//Font size
+		cv::Scalar(255, 255, 255)
+	);
+	
+	cv::rectangle(
+		control_panel,
+		cv::Point(2 * BUTTON_SIZE, BUTTON_SIZE),
+		cv::Point(BUTTON_SIZE * 3, BUTTON_SIZE * 2),
+		x_color,
+		cv::FILLED
+	);
+	cv::putText(
+		control_panel,
+		std::string({x_map[0]}),
+		cv::Point(2 * BUTTON_SIZE + BUTTON_SIZE/4, 3 * BUTTON_SIZE / 2),
+		cv::FONT_HERSHEY_COMPLEX,
+		0.5,//Font size
+		cv::Scalar(0, 0, 0)
+	);
+	
+	//y bar
+	cv::rectangle(
+		control_panel,
+		cv::Point(0, BUTTON_SIZE * 2),
+		cv::Point(BUTTON_SIZE, BUTTON_SIZE * 3),
+		cv::Scalar(0, 200, 200),
+		cv::FILLED
+	);
+	cv::putText(
+		control_panel,
+		"Y",
+		cv::Point(BUTTON_SIZE/4, BUTTON_SIZE + 3 * BUTTON_SIZE / 2),
+		cv::FONT_HERSHEY_COMPLEX,
+		0.5,//Font size
+		cv::Scalar(0, 0, 0)
+	);
+	
+	cv::rectangle(
+		control_panel,
+		cv::Point(BUTTON_SIZE, BUTTON_SIZE * 2),
+		cv::Point(BUTTON_SIZE * 2, BUTTON_SIZE * 3),
+		y_color / 2,
+		cv::FILLED
+	);
+	cv::putText(
+		control_panel,
+		std::string({y_map[1]}),
+		cv::Point(BUTTON_SIZE + BUTTON_SIZE/4, BUTTON_SIZE + 3 * BUTTON_SIZE / 2),
+		cv::FONT_HERSHEY_COMPLEX,
+		0.5,//Font size
+		cv::Scalar(255, 255, 255)
+	);
+	
+	cv::rectangle(
+		control_panel,
+		cv::Point(2 * BUTTON_SIZE, BUTTON_SIZE * 2),
+		cv::Point(BUTTON_SIZE * 3, BUTTON_SIZE * 3),
+		y_color,
+		cv::FILLED
+	);
+	cv::putText(
+		control_panel,
+		std::string({y_map[0]}),
+		cv::Point(2 * BUTTON_SIZE + BUTTON_SIZE/4, BUTTON_SIZE + 3 * BUTTON_SIZE / 2),
+		cv::FONT_HERSHEY_COMPLEX,
+		0.5,//Font size
+		cv::Scalar(0, 0, 0)
+	);
+	
+	//z bar
+	cv::rectangle(
+		control_panel,
+		cv::Point(0, BUTTON_SIZE * 3),
+		cv::Point(BUTTON_SIZE, BUTTON_SIZE * 4),
+		cv::Scalar(200, 200, 0),
+		cv::FILLED
+	);
+	cv::putText(
+		control_panel,
+		"Z",
+		cv::Point(BUTTON_SIZE/4, 2 * BUTTON_SIZE + 3 * BUTTON_SIZE / 2),
+		cv::FONT_HERSHEY_COMPLEX,
+		0.5,//Font size
+		cv::Scalar(0, 0, 0)
+	);
+	
+	cv::rectangle(
+		control_panel,
+		cv::Point(BUTTON_SIZE, BUTTON_SIZE * 3),
+		cv::Point(BUTTON_SIZE * 2, BUTTON_SIZE * 4),
+		z_color / 2,
+		cv::FILLED
+	);
+	cv::putText(
+		control_panel,
+		std::string({z_map[1]}),
+		cv::Point(BUTTON_SIZE + BUTTON_SIZE/4, 2 * BUTTON_SIZE + 3 * BUTTON_SIZE / 2),
+		cv::FONT_HERSHEY_COMPLEX,
+		0.5,//Font size
+		cv::Scalar(255, 255, 255)
+	);
+	
+	cv::rectangle(
+		control_panel,
+		cv::Point(2 * BUTTON_SIZE, BUTTON_SIZE * 3),
+		cv::Point(BUTTON_SIZE * 3, BUTTON_SIZE * 4),
+		z_color,
+		cv::FILLED
+	);
+	cv::putText(
+		control_panel,
+		std::string({z_map[0]}),
+		cv::Point(2 * BUTTON_SIZE + BUTTON_SIZE/4, 2 * BUTTON_SIZE + 3 * BUTTON_SIZE / 2),
+		cv::FONT_HERSHEY_COMPLEX,
+		0.5,//Font size
+		cv::Scalar(0, 0, 0)
+	);
 }
 
 int main(int argc, char ** argv){
@@ -201,6 +394,11 @@ int main(int argc, char ** argv){
 	}
 	
 	cv::namedWindow("Camera and Axes");
+	
+	cv::namedWindow("Controls");
+	control_panel = cv::Mat(BUTTON_SIZE * 4, BUTTON_SIZE * 3, CV_8UC3, cv::Scalar(0, 0, 0));
+	cp_draw();
+	
 	
 	ros::Subscriber imsub = nh.subscribe(argv[1], 1, new_frame_CB);
 	

@@ -16,4 +16,4 @@ catkin_package(
 add_executable(intrinsic_acquisition src/intrinsic_acquisition.cpp)
 target_link_libraries(intrinsic_acquisition ${catkin_LIBRARIES})
 add_executable(intrinsic_axes_helper src/intrinsic_axes_helper.cpp)
-target_link_libraries(intrinsic_axes_helper ${OpenCV_LIBS} ${catkin_LIBRARIES})
+target_link_libraries(intrinsic_axes_helper ${OpenCV_LIBS} ${catkin_LIBRARIES} yaml-cpp)

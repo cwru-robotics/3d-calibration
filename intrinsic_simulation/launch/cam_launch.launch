@@ -1,17 +1,23 @@
 <launch>
+	<arg
+		name="cam_file"
+		default="$(find intrinsic_simulation)/tests/basic_camera.yml"
+		doc="Path to look for Camera Ground Truth File (if it exists)."
+	/>
+
+
 	<!--env name="GAZEBO_MODEL_PATH" value="$(find roadprintz_camera_eval)/model"/>
 	<env name="GAZEBO_MODEL_PATH" value="$(find roadprintz_camera_eval)/props"/-->
 
 	<include file="$(find gazebo_ros)/launch/empty_world.launch"/>
 	
-	<!--Spawn the hand-on-wheels-->
-	<!--TODO Change this to our custom model-->
+	<!--Spawn the camera-->
 	<param
 		name="robot_description"
 		command="
 			$(find xacro)/xacro
 			'$(find intrinsic_simulation)/urdf/camera.urdf'
-			--inorder
+			gt_file:=cam_file
 		"
 	/>
 	<node

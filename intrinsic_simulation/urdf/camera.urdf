@@ -1,5 +1,9 @@
 <?xml version="1.0" ?>
 <robot name="simple_camera" xmlns:xacro="http://ros.org/wiki/xacro">
+
+	<xacro:property name="gt_file" default="$(find intrinsic_simulation)/tests/basic_camera.yml"/>
+	<xacro:property name="yml_dict" value="${load_yaml(gt_file)}"/>
+
  	<link name="world"/>
  	
 	<link name="camera_optical_link_real">
@@ -34,7 +38,7 @@
 	<joint name="camera_optical_joint_real" type="fixed">
 		<parent link="world"/>
 		<child link="camera_optical_link_real"/>
-		<origin rpy="0 0 0" xyz="-0.102 0.017 -0.4"/>
+		<origin rpy="${yml_dict['r']} ${yml_dict['p']} ${yml_dict['w']}" xyz="${yml_dict['x']} ${yml_dict['y']} ${yml_dict['z']}"/>
 	</joint>
 	
 	<!-- gazebo uses the x-axis of the camera frame as optical axis, which is annoying-->
@@ -48,15 +52,15 @@
 	</gazebo>
 
 	<!-- camera simulator plug-in -->
-	<!-- TODO: Parametrize this-->
 	<gazebo reference="camera_optical_link_fixed">
 		<sensor type="camera" name="camera">
 			<update_rate>0</update_rate>
 			<camera name="camera">
-				<horizontal_fov>1.215</horizontal_fov>
+				<!-- Gazebo's horizontal FOV is from image edge to image edge, the standard equation is from image edge to image center. Hence the 2.0 *-->
+				<horizontal_fov>${2.0 * atan2(yml_dict['resolution_u'], 2 * yml_dict['focal'])}</horizontal_fov>
 				<image>
-					<width>2304</width>
-					<height>1296</height>
+					<width>${yml_dict['resolution_u']}</width>
+					<height>${yml_dict['resolution_v']}</height>
 					<format>R8G8B8</format>
 				</image>
 				<clip>
@@ -69,11 +73,11 @@
 					<stddev>0.025</stddev>
 				</noise>
 				<distortion>
-					<k1>-0.433351</k1>
-					<k2>0.257538</k2>
-					<k3>-0.090683</k3>
-					<p1>0.000512</p1>
-					<p2>0.000263</p2>
+					<k1>${yml_dict['k1']}</k1>
+					<k2>${yml_dict['k2']}</k2>
+					<k3>${yml_dict['k3']}</k3>
+					<p1>${yml_dict['p1']}</p1>
+					<p2>${yml_dict['p2']}</p2>
 				</distortion>
 			</camera>
 			<plugin name="camera_controller" filename="libgazebo_ros_camera.so">
@@ -83,11 +87,11 @@
 				<imageTopicName>image_raw_color</imageTopicName>
 				<cameraInfoTopicName>camera_info</cameraInfoTopicName>
 				<frameName>camera_link</frameName>
-				<distortionK1>-0.433351</distortionK1>
-				<distortionK2>0.257538</distortionK2>
-				<distortionK3>-0.090683</distortionK3>
-				<distortionT1>0.000512</distortionT1>
-				<distortionT2>0.000263</distortionT2>
+				<distortionK1>${yml_dict['k1']}</distortionK1>
+				<distortionK2>${yml_dict['k2']}</distortionK2>
+				<distortionK3>${yml_dict['k3']}</distortionK3>
+				<distortionT1>${yml_dict['p1']}</distortionT1>
+				<distortionT2>${yml_dict['p2']}</distortionT2>
 			</plugin>
 		</sensor>
 	</gazebo>

@@ -1,0 +1,129 @@
+<?xml version="1.0" ?>
+<robot name="simple_camera" xmlns:xacro="http://ros.org/wiki/xacro">
+	<!-- Params -->
+	<xacro:property name="target_file" default="$(find intrinsic_acquisition)/data/task_description.yml"/>
+	<xacro:property name="yml_dict_target" value="${load_yaml(target_file)}"/>
+	
+	<xacro:property name="position_file" default="$(find intrinsic_simulation)/tests/basic_camera.yml"/>
+	<xacro:property name="yml_dict_position" value="${load_yaml(position_file)}"/>
+	
+	<xacro:property name="sled_xyz" default="0 0 0.5"/>
+	<xacro:property name="sled_rpy" default="0 0 0"/>
+	
+	
+	<!-- Macros -->
+	<xacro:macro name="dot_line" params="x y">
+		<xacro:dot  x="${x}" y="${y}"/>
+		<xacro:if value="${x > 1}">
+			<xacro:dot_line  x="${x - 1}" y="${y}"/>
+		</xacro:if>
+	</xacro:macro>
+	
+	<xacro:macro name="dot" params="x y">
+		<visual>
+			<origin
+				xyz="
+					${(x-1) * yml_dict_target['target_spacing']}
+					${(y-1) * yml_dict_target['target_spacing']}
+					0
+				"
+				rpy="0 0 0"
+			/>
+			<geometry>
+				<cylinder length="0.001" radius="${yml_dict_target['target_radius']}"/>
+			</geometry>
+		</visual>
+		<xacro:if value="${y > 1}">
+			<xacro:dot  x="${x}" y="${y - 1}"/>
+		</xacro:if>
+	</xacro:macro>
+	
+
+	<!-- Main model -->
+ 	<link name="world"/>
+ 	
+	<link name="sled_head">
+		<!--Every element needs an inertial for some reason...-->
+		<inertial>
+			<mass value="1e-5" />
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+		</inertial>
+	</link>
+
+	<joint name="sled_head_joint" type="fixed">
+		<parent link="world"/>
+		<child link="sled_head"/>
+		<origin rpy="${sled_rpy}" xyz="${sled_xyz}"/>
+	</joint>
+	
+	<link name="target">
+		<!--Every element needs an inertial for some reason...-->
+		<inertial>
+			<mass value="1e-5" />
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+		</inertial>
+		<!--Backboard-->
+		<visual>
+			<origin xyz="
+				${0.5 * (yml_dict_target['target_x'] - 1) * yml_dict_target['target_spacing']}
+				${0.5 * (yml_dict_target['target_y'] - 1) * yml_dict_target['target_spacing']}
+				0.0
+			" rpy="0 0 0"/>
+			<geometry>
+				<box size="
+					${(yml_dict_target['target_x'] + 2) * yml_dict_target['target_spacing']}
+					${(yml_dict_target['target_y'] + 2) * yml_dict_target['target_spacing']}
+					0.0005
+				"/>
+			</geometry>
+			<material name="black">
+				<color rgba="0 1 1 1"/>
+			</material>
+		</visual>
+		
+	</link>
+	<gazebo reference="target">
+		<material>Gazebo/White</material>
+	</gazebo>
+	
+	
+	<joint name="sled_head_to_target_joint" type="fixed">
+		<parent link="sled_head"/>
+		<child link="target"/>
+		<origin
+			rpy="
+				${yml_dict_position['sled_to_target_r']}
+				${yml_dict_position['sled_to_target_p']}
+				${yml_dict_position['sled_to_target_y']}
+			"
+			xyz="
+				${yml_dict_position['sled_to_target_x']}
+				${yml_dict_position['sled_to_target_y']}
+				${yml_dict_position['sled_to_target_z']}
+			"
+		/>
+	</joint>
+	
+	<link name="dots">
+		<!--Every element needs an inertial for some reason...-->
+		<inertial>
+			<mass value="1e-5" />
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+		</inertial>
+		<xacro:dot_line x="${yml_dict_target['target_x']}" y="${yml_dict_target['target_y']}"/>
+		
+	</link>
+	<gazebo reference="dots">
+		<material>Gazebo/Black</material>
+	</gazebo>
+	
+	
+	<joint name="target_to_dots_joint" type="fixed">
+		<parent link="target"/>
+		<child link="dots"/>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+	</joint>
+</robot>

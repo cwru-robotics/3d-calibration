@@ -195,13 +195,13 @@ int main(int argc, char ** argv){
 				p.x = x;
 				p.y = y;
 				p.z = z;
-				motion_publisher.publish(p);
 				
 				std::thread click_thread(key_thread);
 				ready_to_record = false;
 				skip = true;
 				while(!ready_to_record && ros::ok()){
 					ros::spinOnce();
+					motion_publisher.publish(p);
 				}
 				click_thread.detach();
 				
@@ -214,6 +214,11 @@ int main(int argc, char ** argv){
 					std::string x_code = replaceChar(std::to_string(x), '.', 'p');
 					std::string y_code = replaceChar(std::to_string(y), '.', 'p');
 					std::string z_code = replaceChar(std::to_string(z), '.', 'p');
+					
+					cv::namedWindow("Captured image");
+					cv::imshow("Captured image", img);
+					cv::waitKey(1000);
+					cv::destroyAllWindows();
 					
 					cv::imwrite(
 						data_path + "/img_"+x_code+"_"+y_code+"_"+z_code+".png",

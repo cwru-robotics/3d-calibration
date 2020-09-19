@@ -22,12 +22,12 @@ sled_y: y+
 sled_z: z+
 
 
-camera_to_sled_guess_x: 0.0
-camera_to_sled_guess_y: 0.0
-camera_to_sled_guess_z: 0.0
-camera_to_sled_guess_r: 0.0
-camera_to_sled_guess_p: 0.0
-camera_to_sled_guess_w: 0.0
+mill_to_camera_guess_x: 0.0
+mill_to_camera_guess_y: 0.0
+mill_to_camera_guess_z: 0.0
+mill_to_camera_guess_r: 0.0
+mill_to_camera_guess_p: 0.0
+mill_to_camera_guess_w: 0.0
 
 sled_to_target_guess_x: 0.0
 sled_to_target_guess_y: 0.0

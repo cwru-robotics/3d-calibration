@@ -8,9 +8,16 @@ k3: -0.090683
 p1:  0.000512
 p2:  0.000263
 
-x: -0.102
-y:  0.017
-z:  0.4
-r: 0
-p: 0
-w: 0
+mill_to_camera_x: -0.102
+mill_to_camera_y:  0.017
+mill_to_camera_z:  0.4
+mill_to_camera_r: 0
+mill_to_camera_p: 0
+mill_to_camera_w: 0
+
+sled_to_target_x: 0.0
+sled_to_target_y: 0.0
+sled_to_target_z: 0.0
+sled_to_target_r: 0.0
+sled_to_target_p: 0.0
+sled_to_target_w: 0.0

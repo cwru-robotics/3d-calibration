@@ -38,7 +38,10 @@
 	<joint name="camera_optical_joint_real" type="fixed">
 		<parent link="world"/>
 		<child link="camera_optical_link_real"/>
-		<origin rpy="${yml_dict['r']} ${yml_dict['p']} ${yml_dict['w']}" xyz="${yml_dict['x']} ${yml_dict['y']} ${yml_dict['z']}"/>
+		<origin 
+			rpy="${yml_dict['mill_to_camera_r']} ${yml_dict['mill_to_camera_p']} ${yml_dict['mill_to_camera_w']}"
+			xyz="${yml_dict['mill_to_camera_x']} ${yml_dict['mill_to_camera_y']} ${yml_dict['mill_to_camera_z']}"
+		/>
 	</joint>
 	
 	<!-- gazebo uses the x-axis of the camera frame as optical axis, which is annoying-->

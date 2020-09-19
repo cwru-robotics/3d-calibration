@@ -1,0 +1,32 @@
+<launch>
+	<arg
+		name="cam_file"
+		default="$(find intrinsic_simulation)/tests/basic_camera.yml"
+		doc="Path to look for Camera Ground Truth File (if it exists)."
+	/>
+	<arg
+		name="acquire_file"
+		default="$(find intrinsic_acquisition)/data/task_description.yml"
+		doc="Path to look for Test Description File (if it exists)."
+	/>
+
+	<arg name="x"/>
+	<arg name="y"/>
+	<arg name="z"/>
+
+	<param
+		name="target_description"
+		command="
+			$(find xacro)/xacro
+			'$(find intrinsic_simulation)/urdf/target.urdf'
+			target_file:=$(arg acquire_file)
+			position_file:=$(arg cam_file)
+			sled_xyz:='$(arg x) $(arg y) $(arg z)'
+		"
+	/>
+	<node
+		name="spawn_target" pkg="gazebo_ros"
+		type="spawn_model" output="screen"
+		args="-param target_description -urdf -model target"
+	/>
+</launch>

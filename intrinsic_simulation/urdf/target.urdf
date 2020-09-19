@@ -7,8 +7,8 @@
 	<xacro:property name="position_file" default="$(find intrinsic_simulation)/tests/basic_camera.yml"/>
 	<xacro:property name="yml_dict_position" value="${load_yaml(position_file)}"/>
 	
-	<xacro:property name="sled_xyz" default="0 0 0.5"/>
-	<xacro:property name="sled_rpy" default="0 0 0"/>
+	<xacro:arg name="sled_xyz" default="0 0 0.5"/>
+	<xacro:arg name="sled_rpy" default="0 0 0"/>
 	
 	
 	<!-- Macros -->
@@ -54,7 +54,7 @@
 	<joint name="sled_head_joint" type="fixed">
 		<parent link="world"/>
 		<child link="sled_head"/>
-		<origin rpy="${sled_rpy}" xyz="${sled_xyz}"/>
+		<origin rpy="$(arg sled_rpy)" xyz="$(arg sled_xyz)"/>
 	</joint>
 	
 	<link name="target">

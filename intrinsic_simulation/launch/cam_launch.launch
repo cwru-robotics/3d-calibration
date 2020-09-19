@@ -46,5 +46,11 @@
 		type="spawn_model" output="screen"
 		args="-param target_description -urdf -model target"
 	/>
+	
+	<!--Set up the management system to move targets around-->
+	<node
+		name="spawner" pkg="intrinsic_simulation"
+		type="sim_mover" output="screen"
+	/>
 
 </launch>

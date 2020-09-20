@@ -190,11 +190,12 @@ int main(int argc, char ** argv){
 	//TODO There is a more efficient to maneuver around but harder to
 	//algorithmically generate search pattern involving a series of
 	//expanding cubical shells.
+	int i = 0;
 	for(double x = min_x; x <= max_x; x += inc_x){
 		for(double y = min_y; y <= max_y; y += inc_y){
 			for(double z = min_z; z <= max_z; z += inc_z){
 				
-				printf("\n Move sled to x=%f y=%f z=%f and then press s to skip or other to acquire: ", x, y, z);
+				printf("\n%f%%: Move sled to x=%f y=%f z=%f and then press s to skip or other to acquire: ", (i / ((double) x * y * z)), x, y, z);
 				
 				std::thread click_thread(key_thread);
 				std::thread service_thread(topic_thread, x, y, z);

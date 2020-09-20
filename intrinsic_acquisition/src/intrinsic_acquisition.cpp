@@ -4,6 +4,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <std_msgs/Bool.h>
 #include <geometry_msgs/Point.h>
+#include <turtlesim/Spawn.h>
 
 #include <opencv2/opencv.hpp>
 
@@ -18,9 +19,16 @@ std::string replaceChar(std::string str, char ch1, char ch2) {
 
 bool ready_to_record;
 bool skip;
-void motion_cb(const std_msgs::Bool::ConstPtr & msg){
+void topic_thread(double x, double y, double z){
+	turtlesim::Spawn srv;
+	srv.request.x = x;
+	srv.request.y = y;
+	srv.request.theta = z;
+	while(!ros::service::call("/motion_command", srv) && ! ros::ok()){
+		ros::spinOnce();
+	}
 	ready_to_record = true;
-	skip = msg->data;
+	skip = !srv.response.name.empty();
 }
 void key_thread(){
 	char code = std::getchar();
@@ -174,9 +182,6 @@ int main(int argc, char ** argv){
 	}
 	ROS_INFO("Recieving images on topic %s.", argv[1]);
 	
-	ros::Subscriber motion_reciever = nh.subscribe("/motion_result", 1, motion_cb);
-	ros::Publisher motion_publisher = nh.advertise<geometry_msgs::Point>("/motion_command", false);
-	
 	std::string data_path = std::string(argv[2]);
 	data_path = data_path.substr(0, data_path.find_last_of("\\/"));
 	ROS_INFO("Data will be saved at %s.", data_path.c_str());
@@ -191,19 +196,16 @@ int main(int argc, char ** argv){
 				
 				printf("\n Move sled to x=%f y=%f z=%f and then press s to skip or other to acquire: ", x, y, z);
 				
-				geometry_msgs::Point p;
-				p.x = x;
-				p.y = y;
-				p.z = z;
-				
 				std::thread click_thread(key_thread);
+				std::thread service_thread(topic_thread, x, y, z);
 				ready_to_record = false;
 				skip = true;
 				while(!ready_to_record && ros::ok()){
 					ros::spinOnce();
-					motion_publisher.publish(p);
+					//motion_publisher.publish(p);
 				}
 				click_thread.detach();
+				service_thread.detach();
 				
 				if(!skip){
 					got_image = false;

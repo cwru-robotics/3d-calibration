@@ -3,9 +3,10 @@
 #include <std_msgs/Bool.h>
 #include <geometry_msgs/Point.h>
 #include <gazebo_msgs/DeleteModel.h>
+#include <turtlesim/Spawn.h>
 
 ros::Publisher success_publisher;
-void target_move_CB(const geometry_msgs::Point::ConstPtr & p){
+bool target_move_CB(turtlesim::Spawn::Request & req, turtlesim::Spawn::Response & res){
 
 	//Delete the old target
 	gazebo_msgs::DeleteModel dm;
@@ -19,14 +20,13 @@ void target_move_CB(const geometry_msgs::Point::ConstPtr & p){
 	system(("roslaunch "
 		+ ros::package::getPath("intrinsic_simulation")
 		+ "/xml/spawn_target.launch"
-		+ " x:=" + std::to_string(p->x) + " y:=" + std::to_string(p->y) + " z:=" + std::to_string(p->z)
+		+ " x:=" + std::to_string(req.x) + " y:=" + std::to_string(req.y) + " z:=" + std::to_string(req.theta)
 	).c_str());
 	ros::Duration(1.0).sleep();
 
 	//Give the go-ahead to proceed
-	std_msgs::Bool b;
-	b.data = false;
-	success_publisher.publish(b);
+	res.name = "";
+	return true;
 }
 
 int main(int argc, char ** argv){
@@ -34,8 +34,7 @@ int main(int argc, char ** argv){
 	ros::init(argc, argv, "sim_placer");
 	ros::NodeHandle nh;
 	
-	success_publisher = nh.advertise<std_msgs::Bool>("/motion_result", false);
-	ros::Subscriber motion_subscriber = nh.subscribe("/motion_command", 1, target_move_CB);
+	ros::ServiceServer motion_maker = nh.advertiseService("/motion_command", target_move_CB);
 	
 	ROS_INFO("Simulator is ready to move target.");
 	

@@ -1,0 +1,20 @@
+<launch>
+	<arg
+		name="adf_path"
+		default="$(find intrinsic_acquisition)/data/task_description.yml"
+		doc="Path and name of the Acquisition Description File. Images are expected to be located in the same folder."
+	/>
+	<arg
+		name="csv_path"
+		default="$(find intrinsic_acquisition)/data/intrinsic_detections.csv"
+		doc="Location to output data."
+	/>
+	
+	<node
+		name="detector"
+		pkg="dotboard_detection"
+		type="dots_detector"
+		args="$(arg adf_path) $(arg csv_path)"
+		output="screen"
+	/>
+</launch>

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package>
+	<name>dotboard_detection</name>
+	<version>1.0.0</version>
+	<description>Detector for dotted targets.</description>
+	<maintainer email="tes77@case.edu">Tom Shkurti</maintainer>
+	<!--What is roadprintz's code licensed as?-->
+	<license>TODO</license>
+	
+	<buildtool_depend>catkin</buildtool_depend>
+	
+	<build_depend>roscpp</build_depend>	<run_depend>roscpp</run_depend>
+	
+	<export></export>
+</package>

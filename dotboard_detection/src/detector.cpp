@@ -46,13 +46,13 @@ int main(int argc, char** argv) {
 		printf("\e[31mTDF \"%s\" is missing its target_spacing field.\e[39m\n", argv[1]);
 		return 0;
 	}
-	int target_spacing = data_file["target_spacing"].as<double>();
+	double target_spacing = data_file["target_spacing"].as<double>();
 	
 	if(!data_file["sled_x"]){
 		printf("\e[31mTDF \"%s\" is missing its sled_x axis field.\e[39m\n", argv[1]);
 		return 0;
 	}
-	std::string sled_x = data_file["sled_y"].as<std::string>();
+	std::string sled_x = data_file["sled_x"].as<std::string>();
 	if(!data_file["sled_y"]){
 		printf("\e[31mTDF \"%s\" is missing its sled_y axis field.\e[39m\n", argv[1]);
 		return 0;
@@ -157,7 +157,7 @@ int main(int argc, char** argv) {
 		bool patternfound = findCirclesGrid(grayscaleImage, patternsize, centers, 1, circle_detector_ptr_);
 		
 		if (patternfound) {
-			printf("\tPattern found in image %d.\n", i_image);
+			printf("\tPattern found in image %d.\n", i_image + 1);
 			
 			//Find the coordinates in the mill frame.
 			std::string imname = vec_of_image_names[i_image];
@@ -247,7 +247,7 @@ int main(int argc, char** argv) {
 	}
 	
 	printf(
-		"\n\e[36mDetection process complete. \e[1m%d / %d\e[36m patterns not found (\e[1m%f%%\e[36m).\e[39m\n\n",
+		"\n\e[36mDetection process complete. \e[1m%d / %d\e[39m\e[36m patterns not found (\e[1m%f%%\e[36m).\e[39m\n\n",
 		failures, n_images, (float)failures/(float)n_images
 	);
 	calib_output_file.close();

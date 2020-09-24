@@ -1,10 +1,11 @@
 target_x: 5
+res_y: 2304
 target_y: 5
-inc_sled_x: 0.05
+max_sled_x: 0.2
 target_radius: 0.01
+inc_sled_x: 0.05
 target_spacing: 0.0348488
 min_sled_x: -0.4
-max_sled_x: 0.2
 min_sled_y: -0.15
 max_sled_y: 0.1
 inc_sled_y: 0.05
@@ -26,3 +27,4 @@ sled_to_target_guess_z: 0.0
 sled_to_target_guess_r: 0.0
 sled_to_target_guess_p: 0.0
 sled_to_target_guess_w: 0.0
+res_x: 1296

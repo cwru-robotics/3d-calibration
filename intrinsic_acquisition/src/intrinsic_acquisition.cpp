@@ -183,6 +183,13 @@ int main(int argc, char ** argv){
 		ros::Duration(1.0).sleep();
 	}
 	ROS_INFO("Recieving images on topic %s.", argv[1]);
+	ROS_INFO("Resolution is %d by %d.", img.rows, img.cols);
+	data_file["res_x"] = img.rows;
+	data_file["res_y"] = img.cols;
+	std::ofstream e_out;
+	e_out.open(argv[2]);
+	e_out << data_file;
+	e_out.close();
 	
 	std::string data_path = std::string(argv[2]);
 	data_path = data_path.substr(0, data_path.find_last_of("\\/"));

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package>
+	<name>cc_utils</name>
+	<version>1.0.0</version>
+	<description>Utility library for camera calibration using Ceres.</description>
+	<maintainer email="tes77@case.edu">Tom Shkurti</maintainer>
+	<!--What is roadprintz's code licensed as?-->
+	<license>TODO</license>
+	
+	<buildtool_depend>catkin</buildtool_depend>
+	
+	<build_depend>roscpp</build_depend>	<run_depend>roscpp</run_depend>
+	
+	<export></export>
+</package>

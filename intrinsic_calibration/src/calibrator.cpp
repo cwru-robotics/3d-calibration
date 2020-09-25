@@ -326,7 +326,7 @@ int main(int argc, char** argv) {
 	
 	std::printf("INTRINSICS:\n");
 	std::printf(
-		"\tfx = \e[35m%f\e[36m\tfy = \e[35m%f\e[36m\t cx = \e[35m%f\e[36m\t cy = \\e[35m%f\e[36m\n",
+		"\tfx = \e[35m%f\e[36m\tfy = \e[35m%f\e[36m\t cx = \e[35m%f\e[36m\t cy = \e[35m%f\e[36m\n",
 		//fx		fy		cx		cy
 		projection[0], projection[1], projection[2], projection[3]
 	);

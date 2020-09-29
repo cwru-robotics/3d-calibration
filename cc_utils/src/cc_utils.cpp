@@ -41,17 +41,12 @@ namespace cc_utils{
 		cnt = 0;
 	
 		for(int i = 0; i < gt_pixels.size(); i++){
-			double pixvec[2] = {gt_pixels[i][0], gt_pixels[i][1]};
-			if(!(pixvec[0] < 1 || pixvec[0] > res_x || pixvec[1] < 1 || pixvec[1] > res_y)){
-				the_ground_truth.at<uchar>(std::rint(pixvec[1]) - 1, std::rint(pixvec[0]) - 1, 0) = 255;
-				the_ground_truth.at<uchar>(std::rint(pixvec[1]) - 1, std::rint(pixvec[0]), 0) = 255;
-				the_ground_truth.at<uchar>(std::rint(pixvec[1]) - 1, std::rint(pixvec[0]) + 1, 0) = 255;
-				the_ground_truth.at<uchar>(std::rint(pixvec[1]), std::rint(pixvec[0]) - 1, 0) = 255;
-				the_ground_truth.at<uchar>(std::rint(pixvec[1]), std::rint(pixvec[0]) + 1, 0) = 255;
-				the_ground_truth.at<uchar>(std::rint(pixvec[1]) + 1, std::rint(pixvec[0]) - 1, 0) = 255;
-				the_ground_truth.at<uchar>(std::rint(pixvec[1]) + 1, std::rint(pixvec[0]), 0) = 255;
-				the_ground_truth.at<uchar>(std::rint(pixvec[1]) + 1, std::rint(pixvec[0]) + 1, 0) = 255;
-			}
+			cv::drawMarker(
+				the_ground_truth,
+				cv::Point(gt_pixels[i][0], gt_pixels[i][1]),
+				cv::Scalar(255, 0, 0),//Marker color
+				cv::MARKER_TILTED_CROSS, 5//Type and size.
+			);
 		}
 		
 		the_ground_truth.copyTo(debug_mat);
@@ -61,21 +56,12 @@ namespace cc_utils{
 	}
 	
 	void add_to_visualization(double u, double v, double u_base, double v_base){
-
 		u_calc.push_back(u);
 		v_calc.push_back(v);
 		u_real.push_back(u_base);
 		v_real.push_back(v_base);
-	
-		if(u < 1 || u > debug_mat.rows - 1 || v < 1 || v > debug_mat.cols - 1){
-			return;
-		}
 		
-		debug_mat.at<cv::Vec3b>((int)std::rint(v) - 1, (int)std::rint(u) - 1)[1] = 255;
-		debug_mat.at<cv::Vec3b>((int)std::rint(v) + 1, (int)std::rint(u) - 1)[1] = 255;
-		debug_mat.at<cv::Vec3b>((int)std::rint(v) - 1, (int)std::rint(u) + 1)[1] = 255;
-		debug_mat.at<cv::Vec3b>((int)std::rint(v) + 1, (int)std::rint(u) + 1)[1] = 255;
-		debug_mat.at<cv::Vec3b>((int)std::rint(v), (int)std::rint(u))[1] = 255;
+		cv::drawMarker(debug_mat, cv::Point(u, v), cv::Scalar(0, 255, 0), cv::MARKER_CROSS, 5);
 	}
 	
 	double rms(){

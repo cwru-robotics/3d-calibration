@@ -2,6 +2,7 @@
 #include "ceres/rotation.h"
 
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 namespace cc_utils{
 	//Visualization utils.

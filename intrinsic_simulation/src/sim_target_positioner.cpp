@@ -19,7 +19,7 @@ bool target_move_CB(turtlesim::Spawn::Request & req, turtlesim::Spawn::Response 
 	//Spawn a new target
 	system(("roslaunch "
 		+ ros::package::getPath("intrinsic_simulation")
-		+ "/xml/spawn_target.launch"
+		+ "/xml/spawn_target.xml"
 		+ " x:=" + std::to_string(req.x) + " y:=" + std::to_string(req.y) + " z:=" + std::to_string(req.theta)
 	).c_str());
 	ros::Duration(1.0).sleep();

@@ -219,10 +219,10 @@ int main(int argc, char** argv) {
 			
 			//For each point...
 			cv::Point2f center;
-			for (int i_circle=0; i_circle<target_x; i_circle++){
-				for (int j_circle=0; j_circle<target_y; j_circle++) {
+			for (int i_circle = 0; i_circle < target_x; i_circle++){
+				for (int j_circle = 0; j_circle < target_y; j_circle++) {
 					//Draw on the image
-					int n_circle = j_circle + i_circle*target_y;
+					int n_circle = i_circle + j_circle*target_y;
 					center = centers[n_circle];
 					cv::circle( image, center, 2, cv::Scalar(0,0,255), 2);
 			

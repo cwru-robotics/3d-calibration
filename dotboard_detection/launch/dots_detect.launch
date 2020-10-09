@@ -16,5 +16,6 @@
 		type="dots_detector"
 		args="$(arg adf_path) $(arg csv_path)"
 		output="screen"
+		required="true"
 	/>
 </launch>

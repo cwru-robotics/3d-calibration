@@ -122,9 +122,11 @@ public:
 			u, v
 		);
 		
+		printf("Real u, v: (%f, %f)\n", image_pixels[0], image_pixels[1]);
+		
 		cc_utils::add_to_visualization(cc_utils::val(u), cc_utils::val(v), image_pixels[0], image_pixels[1]);
 		
-		//std::getchar();
+		std::getchar();
 		
 		residual[0] = u - T(image_pixels[0]);
 		residual[1] = v - T(image_pixels[1]);
@@ -266,9 +268,6 @@ int main(int argc, char** argv) {
 		mill_coordinates.push_back(mill_entry);
 	}
 	printf("Read in \e[1m%d\e[0m entries from %s.\n\n", n, argv[1]);
-	
-	//google::InitGoogleLogging(argv[0]);
-	
 	
 	//Build the optimization problem
 	ceres::Problem problem;

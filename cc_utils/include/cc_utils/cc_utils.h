@@ -88,46 +88,57 @@ namespace cc_utils{
 		T xp1 = point_x;
 		T yp1 = point_y;
 		T zp1 = point_z;
-		T up;
-		T vp;
+		T xp_plane;
+		T yp_plane;
 	
-		//std::cout << point_x << "\n";
-		//std::cout << point_y << "\n";
-		//std::cout << point_z << "\n\n";
+		std::cout << point_x << "\n";
+		std::cout << point_y << "\n";
+		std::cout << point_z << "\n\n";
 		
-		up = cx * zp1 + fx * xp1;
-		vp = cy * zp1 + fy * yp1;
-	
 		if(zp1 != T(0)){//If the distance to the image plane is zero something is VERY wrong.
-			up = up / zp1;
-			vp = vp / zp1;
+			xp_plane = xp1 / zp1;
+			yp_plane = yp1 / zp1;
 		}
 		
-		//std::cout<< "u pre-distort " << up << "\n";
-		//std::cout<< "v pre-distort " << vp << "\n";
-	
+		std::cout<< "x planarized " << xp_plane << "\n";
+		std::cout<< "y planarized " << yp_plane << "\n\n";
+		
+		std::cout<< "fx " << fx << "\n";
+		std::cout<< "fy " << fy << "\n";
+		std::cout<< "cx " << cx << "\n";
+		std::cout<< "cy " << cy << "\n";
+		std::cout<< "k1 " << k1 << "\n";
+		std::cout<< "k2 " << k2 << "\n";
+		std::cout<< "k3 " << k3 << "\n";
+		std::cout<< "p1 " << p1 << "\n";
+		std::cout<< "p2 " << p2 << "\n\n";
+		
 		//Distortion.
-		T rez_h = T(r_x);
-		T rez_v = T(r_y);
-		
-		T U_small = (up - rez_h) / (rez_h * T(2.0));
-		T V_small = (vp - rez_v) / (rez_v * T(2.0));
-		
-		T r2 = pow(U_small, T(2.0)) + pow(V_small, T(2.0));
+		T r2 = pow(xp_plane, T(2.0)) + pow(yp_plane, T(2.0));
 		T r4 = r2 * r2;
 		T r6 = r2 * r2 * r2;
 		
-		T U_radial = U_small * (T(1.0) + k1 * r2 + k2 * r4 + k3 * r6);
-		T V_radial = V_small * (T(1.0) + k1 * r2 + k2 * r4 + k3 * r6);
+		T X_radial = xp_plane * k1 * r2 + xp_plane * k2 * r4 + xp_plane * k3 * r6;
+		T Y_radial = yp_plane * k1 * r2 + yp_plane * k2 * r4 + yp_plane * k3 * r6;
 		
-		T U_tangential = T(2.0) * p1 * U_small * V_small + p2 * (r2 + T(2.0) * U_small * U_small);
-		T V_tangential = p1 * (r2 + T(2.0) * V_small * V_small) + T(2.0) * p2 * U_small * V_small;
+		T X_tangential = T(2.0) * p1 * xp_plane * yp_plane + p2 * (r2 + T(2.0) * xp_plane * xp_plane);
+		T Y_tangential = p1 * (r2 + T(2.0) * yp_plane * yp_plane) + T(2.0) * p2 * xp_plane * yp_plane;
 		
-		u = ((U_radial + U_tangential) * rez_h * T(2.0)) + rez_h;
-		v = ((V_radial + V_tangential) * rez_v * T(2.0)) + rez_v;
+		T xd = xp_plane + X_radial + X_tangential;
+		T yd = yp_plane + Y_radial + Y_tangential;
 		
-		//std::cout<< "u distorted " << u << "\n";
-		//std::cout<< "v distorted " << v << "\n";
+		//T xd = xp_plane;
+		//T yd = yp_plane;
+		
+		//std::cout<< "x distorted " << xd << "\n";
+		//std::cout<< "y distorted " << yd << "\n\n";
+		
+		//Project
+		u = cx + fx * xd;
+		v = cy + fy * yd;
+	
+		std::cout<< "u projected " << u << "\n";
+		std::cout<< "v projected " << v << "\n\n";
 		//std::getchar();
 	}
 	

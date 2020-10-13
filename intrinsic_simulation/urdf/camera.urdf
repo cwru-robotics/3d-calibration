@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
 <robot name="simple_camera" xmlns:xacro="http://ros.org/wiki/xacro">
+	<xacro:include filename="$(find cwru_ros_camera)/modular_camera.urdf" />
 
 	<xacro:property name="gt_file" default="$(find intrinsic_simulation)/tests/basic_camera.yml"/>
 	<xacro:property name="yml_dict" value="${load_yaml(gt_file)}"/>
@@ -7,20 +8,6 @@
  	<link name="world"/>
  	
 	<link name="camera_optical_link_real">
-		<visual>
-			<origin xyz="0 0 0.0" rpy="0 0 0"/>
-			<geometry>
-				<box size="0.1 0.1 0.1"/>
-			</geometry>
-		</visual>
-		<!--Every element needs an inertial for some reason...-->
-		<inertial>
-			<mass value="1e-5" />
-			<origin xyz="0 0 0" rpy="0 0 0"/>
-			<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
-		</inertial>
-	</link>
-	<link name="camera_optical_link_fixed">
 		<visual>
 			<origin xyz="0 0 0.0" rpy="0 0 0"/>
 			<geometry>
@@ -44,58 +31,21 @@
 		/>
 	</joint>
 	
-	<!-- gazebo uses the x-axis of the camera frame as optical axis, which is annoying-->
-	<joint name="camera_optical_joint_fixed" type="fixed">
-		<parent link="camera_optical_link_real"/>
-		<child link="camera_optical_link_fixed"/>
-		<origin rpy="0 -1.5707 1.5707" xyz="0 0 0"/>
-	</joint>
-	<gazebo reference="camera_optical_joint_fixed">
-		<disableFixedJointLumping>true</disableFixedJointLumping>
-	</gazebo>
-
-	<!-- camera simulator plug-in -->
-	<gazebo reference="camera_optical_link_fixed">
-		<sensor type="camera" name="camera">
-			<update_rate>0</update_rate>
-			<camera name="camera">
-				<!-- Gazebo's horizontal FOV is from image edge to image edge, the standard equation is from image edge to image center. Hence the 2.0 *-->
-				<horizontal_fov>${2.0 * atan2(yml_dict['resolution_u'], 2 * yml_dict['focal'])}</horizontal_fov>
-				<image>
-					<width>${yml_dict['resolution_u']}</width>
-					<height>${yml_dict['resolution_v']}</height>
-					<format>R8G8B8</format>
-				</image>
-				<clip>
-					<near>0.005</near>
-					<far>10</far>
-				</clip>
-				<noise>
-					<type>gaussian</type>
-					<mean>0.0</mean>
-					<stddev>0.025</stddev>
-				</noise>
-				<distortion>
-					<k1>${yml_dict['k1']}</k1>
-					<k2>${yml_dict['k2']}</k2>
-					<k3>${yml_dict['k3']}</k3>
-					<p1>${yml_dict['p1']}</p1>
-					<p2>${yml_dict['p2']}</p2>
-				</distortion>
-			</camera>
-			<plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-				<alwaysOn>true</alwaysOn>
-				<updateRate>0</updateRate>
-				<cameraName>camera</cameraName>
-				<imageTopicName>image_raw_color</imageTopicName>
-				<cameraInfoTopicName>camera_info</cameraInfoTopicName>
-				<frameName>camera_link</frameName>
-				<distortionK1>${yml_dict['k1']}</distortionK1>
-				<distortionK2>${yml_dict['k2']}</distortionK2>
-				<distortionK3>${yml_dict['k3']}</distortionK3>
-				<distortionT1>${yml_dict['p1']}</distortionT1>
-				<distortionT2>${yml_dict['p2']}</distortionT2>
-			</plugin>
-		</sensor>
-	</gazebo>
+	<xacro:cwru_camera
+		parent="camera_optical_link_real"
+		image_topic="/camera/image_raw_color"
+		info_topic="/camera/camera_info"
+		k1="${yml_dict['k1']}"
+		k2="${yml_dict['k2']}"
+		k3="${yml_dict['k3']}"
+		p1="${yml_dict['p1']}"
+		p2="${yml_dict['p2']}"
+		
+		f_x="${yml_dict['fx']}"
+		f_y="${yml_dict['fy']}"
+		c_x="${yml_dict['cx']}"
+		c_y="${yml_dict['cy']}"
+		r_u="${yml_dict['resolution_u']}"
+		r_v="${yml_dict['resolution_v']}"
+	/>
 </robot>

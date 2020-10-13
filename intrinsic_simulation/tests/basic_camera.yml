@@ -1,6 +1,9 @@
 resolution_u: 2304
 resolution_v: 1296
-focal: 1600.0
+fx: 1600.0
+fy: 1600.0
+cx: 1152
+cy: 648
 
 k1: -0.433351
 k2:  0.257538

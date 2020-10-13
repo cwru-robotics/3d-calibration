@@ -1,0 +1,20 @@
+<launch>
+	<arg
+		name="cal_dir"
+		default="$(find cam_cal)/calibrations/stella_sim.yml"
+		doc="Location of the calibration file where the intrinsics are."
+	/>
+	<arg
+		name="file"
+		default="$(find intrinsic_acquisition)/data/img_0p050000_0p000000_0p400000.png"
+		doc="Saved image to dewarp."
+	/>
+	
+	<node
+		name="test_dewarp"
+		pkg="test_dewarp"
+		type="test_dewarp_file"
+		args="$(arg cal_dir) $(arg file)"
+		required="true"
+	/>
+</launch>

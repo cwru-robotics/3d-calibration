@@ -91,19 +91,19 @@ namespace cc_utils{
 		T xp_plane;
 		T yp_plane;
 	
-		std::cout << point_x << "\n";
+		/*std::cout << point_x << "\n";
 		std::cout << point_y << "\n";
-		std::cout << point_z << "\n\n";
+		std::cout << point_z << "\n\n";*/
 		
 		if(zp1 != T(0)){//If the distance to the image plane is zero something is VERY wrong.
 			xp_plane = xp1 / zp1;
 			yp_plane = yp1 / zp1;
 		}
 		
-		std::cout<< "x planarized " << xp_plane << "\n";
-		std::cout<< "y planarized " << yp_plane << "\n\n";
+		//std::cout<< "x planarized " << xp_plane << "\n";
+		//std::cout<< "y planarized " << yp_plane << "\n\n";
 		
-		std::cout<< "fx " << fx << "\n";
+		/*std::cout<< "fx " << fx << "\n";
 		std::cout<< "fy " << fy << "\n";
 		std::cout<< "cx " << cx << "\n";
 		std::cout<< "cy " << cy << "\n";
@@ -111,7 +111,7 @@ namespace cc_utils{
 		std::cout<< "k2 " << k2 << "\n";
 		std::cout<< "k3 " << k3 << "\n";
 		std::cout<< "p1 " << p1 << "\n";
-		std::cout<< "p2 " << p2 << "\n\n";
+		std::cout<< "p2 " << p2 << "\n\n";*/
 		
 		//Distortion.
 		T r2 = pow(xp_plane, T(2.0)) + pow(yp_plane, T(2.0));
@@ -137,8 +137,8 @@ namespace cc_utils{
 		u = cx + fx * xd;
 		v = cy + fy * yd;
 	
-		std::cout<< "u projected " << u << "\n";
-		std::cout<< "v projected " << v << "\n\n";
+		//std::cout<< "u projected " << u << "\n";
+		//std::cout<< "v projected " << v << "\n\n";
 		//std::getchar();
 	}
 	

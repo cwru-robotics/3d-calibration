@@ -1,10 +1,10 @@
 target_x: 5
 res_y: 2304
-target_y: 5
-max_sled_x: 0.2
-target_radius: 0.01
 inc_sled_x: 0.05
+max_sled_x: 0.2
 target_spacing: 0.0348488
+target_y: 5
+target_radius: 0.01
 min_sled_x: -0.4
 min_sled_y: -0.15
 max_sled_y: 0.1
@@ -15,9 +15,9 @@ inc_sled_z: 0.05
 sled_x: x+
 sled_y: y+
 sled_z: z+
-mill_to_camera_guess_x: 0.0
-mill_to_camera_guess_y: 0.0
-mill_to_camera_guess_z: 0.0
+mill_to_camera_guess_x: -0.1
+mill_to_camera_guess_y: 0.02
+mill_to_camera_guess_z: -0.3
 mill_to_camera_guess_r: 0.0
 mill_to_camera_guess_p: 0.0
 mill_to_camera_guess_w: 0.0

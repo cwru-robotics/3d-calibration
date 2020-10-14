@@ -122,11 +122,11 @@ public:
 			u, v
 		);
 		
-		printf("Real u, v: (%f, %f)\n", image_pixels[0], image_pixels[1]);
+		//printf("Real u, v: (%f, %f)\n", image_pixels[0], image_pixels[1]);
 		
 		cc_utils::add_to_visualization(cc_utils::val(u), cc_utils::val(v), image_pixels[0], image_pixels[1]);
 		
-		std::getchar();
+		//std::getchar();
 		
 		residual[0] = u - T(image_pixels[0]);
 		residual[1] = v - T(image_pixels[1]);

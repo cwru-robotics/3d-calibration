@@ -1,0 +1,30 @@
+<launch>
+	<arg
+		name="desc_location"
+		default="$(find extrinsic_acquisition)/data/shared_jsp_calibration.csv"
+		doc="Location of the file specifying viewing points to visit."
+	/>
+	<arg
+		name="img_location"
+		default="$(find extrinsic_acquisition)/data/"
+		doc="Place to put the captured images."
+	/>
+	<arg
+		name="cam_location"
+		default="$(find extrinsic_acquisition)/data/cam_info.txt"
+		doc="Place to save camera info."
+	/>
+	<arg
+		name="pose_location"
+		default="$(find extrinsic_acquisition)/data/poses.csv"
+		doc="Place to save recorded poses."
+	/>
+
+	<node
+		name="acquisition"
+		pkg="extrinsic_acquisition"
+		type="extrinsic_acquisition"
+		args="$(arg desc_location) $(arg img_location) $(arg cam_location) $(arg pose_location)"
+		output="screen"
+	/>
+</launch>

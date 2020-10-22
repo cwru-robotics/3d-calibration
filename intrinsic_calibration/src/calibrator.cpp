@@ -154,7 +154,7 @@ int main(int argc, char** argv) {
 	try{
 		position_file = YAML::LoadFile(argv[2]);
 	} catch(YAML::BadFile e){//If file is not extant and well-formed...
-		printf("\e[39mPosition file \"%s\" does not exist or contains syntax errors.\e[31m", argv[2]);
+		printf("\e[39mPosition file \"%s\" does not exist or contains syntax errors.\e[31m\n", argv[2]);
 		return 0;
 	}
 	double CtM_init_x, CtM_init_y, CtM_init_z, CtM_init_r, CtM_init_p, CtM_init_w;
@@ -202,7 +202,7 @@ int main(int argc, char** argv) {
 		resolution_y = position_file["res_y"].as<int>();
 		
 	} catch(YAML::RepresentationException e){
-		printf("\e[39mPosition parse exception \"%s\".\e[31m", e.what());
+		printf("\e[39mPosition parse exception \"%s\".\e[31m\n", e.what());
 		return 0;
 	}
 	printf("\nSuccessfully initialized positions from %s.\n", argv[2]);
@@ -211,7 +211,7 @@ int main(int argc, char** argv) {
 	try{
 		intrinsic_file = YAML::LoadFile(argv[3]);
 	} catch(YAML::BadFile e){//If file is not extant and well-formed...
-		printf("\e[39mInitial intrinsic file \"%s\" does not exist or contains syntax errors.\e[31m", argv[3]);
+		printf("\e[39mInitial intrinsic file \"%s\" does not exist or contains syntax errors.\e[31m\n", argv[3]);
 		return 0;
 	}
 	double fx_init, fy_init, cx_init, cy_init;
@@ -228,7 +228,7 @@ int main(int argc, char** argv) {
 		p1_init = intrinsic_file["p1"].as<double>();
 		p2_init = intrinsic_file["p2"].as<double>();
 	} catch(YAML::RepresentationException e){
-		printf("\e[39mIntrinsic parse exception \"%s\".\e[31m", e.what());
+		printf("\e[39mIntrinsic parse exception \"%s\".\e[31m\n", e.what());
 		return 0;
 	}
 	printf("Successfully initialized intrinsics from %s.\n", argv[3]);
@@ -237,7 +237,7 @@ int main(int argc, char** argv) {
 	std::ifstream data_file;
 	data_file.open(argv[1]);
 	if(!data_file){
-		printf("\e[39mCould not find data file \"%s\".\e[31m", argv[1]);
+		printf("\e[39mCould not find data file \"%s\".\e[31m\n", argv[1]);
 		return 0;
 	}
 	

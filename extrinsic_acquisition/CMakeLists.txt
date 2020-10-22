@@ -15,6 +15,8 @@ include_directories(${catkin_INCLUDE_DIRS})
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 catkin_package(
+	DEPENDS xform_utils
+	CATKIN_DEPENDS xform_utils
 )
 
 add_executable(extrinsic_acquisition src/extrinsic_acquisition.cpp)

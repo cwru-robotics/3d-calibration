@@ -1,0 +1,31 @@
+<launch>
+	<arg
+		name="data"
+		default="$(find extrinsic_acquisition)/data/extrinsic_detections.csv"
+		doc="CSV file of point data."
+	/>
+	<arg
+		name="position_initial"
+		default="$(find cam_cal)/calibrations/stella_external_sim.yml"
+		doc="Acquisition Description File which contains guesses at camera and target positions."
+	/>
+	<arg
+		name="intrinsics"
+		default="$(find cam_cal)/calibrations/stella_calibrated.yml"
+		doc="Calibration file which contains camera intrinsics."
+	/>
+	<arg
+		name="output"
+		default="$(find extrinsic_calibration)/launch/frame_publisher.launch"
+		doc="Output file for finished calibration."
+	/>
+	
+	<node
+		name="calibrator"
+		pkg="extrinsic_calibration"
+		type="ext_calibrator"
+		args="$(arg data) $(arg position_initial) $(arg intrinsics) $(arg output)"
+		output="screen"
+		required="true"
+	/>
+</launch>

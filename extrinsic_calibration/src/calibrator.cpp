@@ -94,6 +94,32 @@ public:
 		
 		T* residual
 	) const {
+		/*std::cout << "INITIAL BTT T:\n";
+		std::cout << BASE_to_TOP_translation[0] << "\n";
+		std::cout << BASE_to_TOP_translation[1] << "\n";
+		std::cout << BASE_to_TOP_translation[2] << "\n\n";
+		std::cout << "INITIAL BTT R:\n";
+		std::cout << BASE_to_TOP_rotation[0] << "\n";
+		std::cout << BASE_to_TOP_rotation[1] << "\n";
+		std::cout << BASE_to_TOP_rotation[2] << "\n\n";
+		std::cout << "INITIAL BTB T:\n";
+		std::cout << BASE_to_BOT_translation[0] << "\n";
+		std::cout << BASE_to_BOT_translation[1] << "\n";
+		std::cout << BASE_to_BOT_translation[2] << "\n\n";
+		std::cout << "INITIAL BTB R:\n";
+		std::cout << BASE_to_BOT_rotation[0] << "\n";
+		std::cout << BASE_to_BOT_rotation[1] << "\n";
+		std::cout << BASE_to_BOT_rotation[2] << "\n\n";
+		std::cout << "INITIAL CAM T:\n";
+		std::cout << CAM_to_FOREARM_translation[0] << "\n";
+		std::cout << CAM_to_FOREARM_translation[1] << "\n";
+		std::cout << CAM_to_FOREARM_translation[2] << "\n\n";
+		std::cout << "INITIAL CAM R:\n";
+		std::cout << CAM_to_FOREARM_rotation[0] << "\n";
+		std::cout << CAM_to_FOREARM_rotation[1] << "\n";
+		std::cout << CAM_to_FOREARM_rotation[2] << "\n\n";*/
+	
+	
 		//CAM_to_POINT = CAM_to_FOREARM * FOREARM_to_BASE * BASE_to_TARGET * TARGET_to_POINT
 		
 		

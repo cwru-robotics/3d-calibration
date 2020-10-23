@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
 	cv_bridge
 	xform_utils
 	trajectory_utils
+	stella_jsp_utils
 )
 
 include_directories(${catkin_INCLUDE_DIRS})

@@ -9,44 +9,7 @@
 #include <opencv2/highgui.hpp>
 
 #include <xform_utils/xform_utils.h>
-#include <trajectory_utils/TrajectoryUtils.h>
-
-//TODO Are some of these utilities generally useful enough to go in their own package?
-std::vector<double> home_pose = {0, 0, 0, 0, 0, 0};
-
-
-std::vector<std::string> known_jnt_names = {
-    "joint_1_s", "joint_2_l", "joint_3_u", "joint_4_r", "joint_5_b", "joint_6_t",
-};
-#define N_JOINTS 6
-#define SETTLE_TOLERANCE 0.05
-std::vector<int> arm_joint_indices;
-bool recent_joint;
-std::vector<double> most_recent_joints(N_JOINTS);
-void CB_joint_states(const sensor_msgs::JointState &js) {
-
-	if(arm_joint_indices.size() < 1){//TODO What is the purpose of this? Is not the joint mapping always consistant?
-		int njnts = js.position.size();
-		arm_joint_indices.clear();
-
-		for (int j = 0; j < N_JOINTS; j++) {
-			std::string j_name = known_jnt_names[j]; // known name, in preferred order
-			for (int k = 0; k < N_JOINTS; k++) {
-				if(j_name.compare(js.name[j]) == 0){
-               				arm_joint_indices.push_back(k);
-                			break;
-                		}
-                	}
-                }
-        }
-        
-        
-	for (int i = 0; i < N_JOINTS; i++) {
-		most_recent_joints[i] = js.position[arm_joint_indices[i]];
-	}
-	recent_joint = true;
-}
-
+#include <stella_jsp_utils/stella_jsp_utils.h>
 
 bool recent_image;
 cv::Mat most_recent_image;
@@ -63,93 +26,6 @@ void CB_image(const sensor_msgs::Image::ConstPtr & im){
 	}
 }
 
-
-void go(
-	const Eigen::VectorXd & dt,
-	const ros::Publisher & irl,
-	const ros::Publisher & sim
-){
-	TrajectoryUtils tu;
-
-	recent_joint = false;
-	while(!recent_joint) {
-		ros::spinOnce();
-		ros::Duration(0.1).sleep();
-	}
-	std::vector<std::vector<double> > des_path;
-	des_path.push_back(most_recent_joints);
-	std::vector<double> goal = {
-		dt(0), dt(1), dt(2), dt(3), 0.0, 0.0
-	};
-	des_path.push_back(goal);
-		
-	trajectory_msgs::JointTrajectory new_trajectory;
-	tu.trapezoidal_p2p_traj(
-		Eigen::Map<Eigen::VectorXd>(des_path[0].data(), N_JOINTS),
-		Eigen::Map<Eigen::VectorXd>(des_path[1].data(), N_JOINTS),
-		new_trajectory
-	);
-	double wait_time = new_trajectory.points.back().time_from_start.toSec();
-	
-	trajectory_msgs::JointTrajectoryPoint traj_point = new_trajectory.points[0];
-	//TODO Is this section here actually at all necessary?
-	ros::spinOnce(); // let callback update the sensed joint angles
-	for (int j = 0; j < N_JOINTS; j++) {
-		traj_point.positions[j] = most_recent_joints[j];
-	}
-	new_trajectory.points[0] = traj_point;
-	//END SECTION
-	new_trajectory.header.stamp = ros::Time::now() + ros::Duration(1.0);
-	
-	//Make the arrival times cumulative because for some reason they are not now.
-	//TODO Why is that the case?
-	for(int j = 1; j < new_trajectory.points.size(); j++){
-		new_trajectory.points[j].time_from_start += new_trajectory.points[j-1].time_from_start;
-	}
-	
-	/*printf("Times are as follows: ");
-	for(int x = 0; x < new_trajectory.points.size(); x++){
-		printf("%f ", new_trajectory.points[x].time_from_start.sec + 10e-9 * new_trajectory.points[x].time_from_start.nsec);
-	}
-	printf("\n");*/
-	
-	irl.publish(new_trajectory);
-	
-	trajectory_msgs::JointTrajectory simu_traj;
-	tu.strip_traj_accels(new_trajectory, simu_traj);
-	sim.publish(simu_traj);
-	
-	printf("Moving...\t");
-	std::cout.flush();
-	
-	ros::Duration(wait_time).sleep();
-	
-	
-	//Settle
-	printf("Settling...\t");
-	std::cout.flush();
-	bool settled = false;
-	while(!settled && ros::ok()){
-		ros::spinOnce();
-		std::vector<double> init_jspace = most_recent_joints;
-		ros::Duration(0.2).sleep();
-		recent_joint = false;
-		while(!recent_joint && ros::ok()){
-			ros::spinOnce();
-		}
-		settled = true;
-		for(int j = 0; j < N_JOINTS; j++){
-			if(abs(most_recent_joints[j] - init_jspace[j])){
-				settled = false;
-				break;
-			}
-		}
-	}
-	ros::Duration(2.0).sleep(); //wait a bit more for settling
-}
-
-
-
 int main(int argc, char ** argv){
 	//ROS initialization
 	ros::init(argc, argv, "extrinsic_acquisition");
@@ -165,7 +41,7 @@ int main(int argc, char ** argv){
 	
 	//Read in the poses we are supposed to visit
 	//We only care about the first four joints even though 6 are recorded.
-	std::vector<Eigen::Vector4d> poses_to_visit;
+	std::vector<std::vector<double> > poses_to_visit;
 	
 	std::ifstream infile;
 	infile.open(argv[1]);
@@ -186,13 +62,13 @@ int main(int argc, char ** argv){
 			return 0;
 		}
 		
-		Eigen::Vector4d arm_entry;
+		std::vector<double> arm_entry(6);
 		double a,b;
 		//TODO Figure out how to record the other half of this data set (the half that begins with negaitve signs)
 		sscanf(line, "%lf, %lf, %lf, %lf, %lf, %lf",
-			&(arm_entry(0)), &(arm_entry(1)),
-			&(arm_entry(2)), &(arm_entry(3)),
-			&a,		 &b
+			&(arm_entry[0]), &(arm_entry[1]),
+			&(arm_entry[2]), &(arm_entry[3]),
+			&(arm_entry[4]), &(arm_entry[5])
 		);
 		poses_to_visit.push_back(arm_entry);
 	}
@@ -220,10 +96,10 @@ int main(int argc, char ** argv){
 	
 	
 	//Warm up callbacks.
-	ros::Subscriber js_sub = nh.subscribe("/joint_states", 1, CB_joint_states);
-	recent_joint = false;
+	ros::Subscriber js_sub = nh.subscribe("/joint_states", 1, go::jointStatesCb);
+	go::g_get_new_jspace = false;
 	printf("\nWaiting for /joint_states... ");
-	while(!recent_joint && ros::ok()){
+	while(!go::g_get_new_jspace && ros::ok()){
 		ros::spinOnce();
 	}
 	printf("Done.\n");
@@ -240,16 +116,18 @@ int main(int argc, char ** argv){
 	//Set up publishers.
 	 ros::Publisher irl_trajectory_pub = nh.advertise<trajectory_msgs::JointTrajectory>("/joint_path_command", 1);
 	 ros::Publisher sim_trajectory_pub = nh.advertise<trajectory_msgs::JointTrajectory>("MH5020/arm_controller/command", 1, true);
+	 go::g_pub_rosi = & irl_trajectory_pub;
+	 go::g_pub_simu = & sim_trajectory_pub;
 	
 	//Check positions
-	printf("\nChecking if robot is near home position... ");
+	/*printf("\nChecking if robot is near home position... ");
 	for(int i = 0; i < N_JOINTS; i++){
 		if(abs(home_pose[i] - most_recent_joints[i]) > 0.1){
 			printf("\n\e[31mJoint %d is not within 0.1 of home.\e[0m\n", i);
 			return 0;
 		}
 	}
-	printf("Done.\n");
+	printf("Done.\n");*/
 	
 	
 	//Open the position output.
@@ -270,10 +148,10 @@ int main(int argc, char ** argv){
 	for(int i = 0; i < n; i++){
 		printf("\t%f%%:\t", 100.0 * (float)i/(float)n);
 		std::cout.flush();
-
-		//Go
-		go(poses_to_visit[i], irl_trajectory_pub, sim_trajectory_pub);
 		
+		printf("Moving...\t");
+		go::go_to(poses_to_visit[i]);
+		std::cout.flush();
 		
 		//Acquire image
 		recent_image = false;
@@ -321,9 +199,10 @@ int main(int argc, char ** argv){
 	
 	cv::destroyAllWindows();
 	frame_output.close();
-	Eigen::VectorXd home;
-	home << 0, 0, 0, 0;
-	go(home, irl_trajectory_pub, sim_trajectory_pub);
+	std::vector<double> home = {
+		0, 0, 0, 0, 0, 0
+	};
+	go::go_to(home);
 
 	return 0;
 }

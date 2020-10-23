@@ -23,7 +23,7 @@
 	<node
 		name="calibrator"
 		pkg="intrinsic_calibration"
-		type="calibrator"
+		type="int_calibrator"
 		args="$(arg data) $(arg position_initial) $(arg intrinsic_initial) $(arg output)"
 		output="screen"
 		required="true"

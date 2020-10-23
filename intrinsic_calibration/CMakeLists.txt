@@ -16,5 +16,5 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 catkin_package(
 )
 
-add_executable(calibrator src/calibrator.cpp)
-target_link_libraries(calibrator ${OpenCV_LIBS} ${catkin_LIBRARIES} ${CERES_LIBRARIES} yaml-cpp)
+add_executable(int_calibrator src/calibrator.cpp)
+target_link_libraries(int_calibrator ${OpenCV_LIBS} ${catkin_LIBRARIES} ${CERES_LIBRARIES} yaml-cpp)

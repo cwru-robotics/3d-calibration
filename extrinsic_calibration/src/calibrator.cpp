@@ -539,6 +539,7 @@ int main(int argc, char** argv) {
    	std::printf("\nFOREARM to CAMERA:\n");
 	std::printf("\tx = \e[35m%f\e[36m\ty = \e[35m%f\e[36m\tz = \e[35m%f\e[36m\n", c_x_out, c_y_out, c_z_out);
 	std::printf("\tr = \e[35m%f\e[36m\tp = \e[35m%f\e[36m\tw = \e[35m%f\e[36m\n", c_r_out, c_p_out, c_w_out);
+	std::cout << "\n\e[35m" << b.matrix() << "\e[36m\n";
    	
    	//Output calibration data.
    	std::printf("\nBASE to TOP TARGET:\n");

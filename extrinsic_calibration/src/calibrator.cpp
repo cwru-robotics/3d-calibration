@@ -538,8 +538,11 @@ int main(int argc, char** argv) {
    	//Output calibration data.
    	std::printf("\nFOREARM to CAMERA:\n");
 	std::printf("\tx = \e[35m%f\e[36m\ty = \e[35m%f\e[36m\tz = \e[35m%f\e[36m\n", c_x_out, c_y_out, c_z_out);
-	std::printf("\tr = \e[35m%f\e[36m\tp = \e[35m%f\e[36m\tw = \e[35m%f\e[36m\n", c_r_out, c_p_out, c_w_out);
-	std::cout << "\n\e[35m" << b.matrix() << "\e[36m\n";
+	std::printf("\tr = \e[35m%f\e[36m\tp = \e[35m%f\e[36m\tw = \e[35m%f\n\n", c_r_out, c_p_out, c_w_out);
+	std::printf("\t%f\t%f\t%f\t%f\n", b.matrix()(0, 0), b.matrix()(0, 1), b.matrix()(0, 2), b.matrix()(0, 3));
+	std::printf("\t%f\t%f\t%f\t%f\n", b.matrix()(1, 0), b.matrix()(1, 1), b.matrix()(1, 2), b.matrix()(1, 3));
+	std::printf("\t%f\t%f\t%f\t%f\n", b.matrix()(2, 0), b.matrix()(2, 1), b.matrix()(2, 2), b.matrix()(2, 3));
+	std::printf("\t%f\t%f\t%f\t%f\e[36m\n", b.matrix()(3, 0), b.matrix()(3, 1), b.matrix()(3, 2), b.matrix()(3, 3));
    	
    	//Output calibration data.
    	std::printf("\nBASE to TOP TARGET:\n");

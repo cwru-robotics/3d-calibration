@@ -407,27 +407,26 @@ int main(int argc, char** argv) {
 	
 	//Camera calibration is most useful externally as FOREARM_to_CAM,
 	//but for the math to work here we want CAM_to_FOREARM. So we will convert.
-	Eigen::Affine3d a;
-	a =
-		Eigen::AngleAxisd(c_r, Eigen::Vector3d::UnitZ()) *
-   		Eigen::AngleAxisd(c_p, Eigen::Vector3d::UnitY()) *
-   		Eigen::AngleAxisd(c_w, Eigen::Vector3d::UnitX());
-   	a.translation() = Eigen::Vector3d(c_x, c_y, c_z);
-   	
-   	Eigen::Affine3d b = a.inverse();
-   	Eigen::Vector3d ea = b.rotation().eulerAngles(2, 1, 0);
-   	
-	double CAM_to_FOREARM_t [3] = {
-		b.translation().x(),
-		b.translation().y(),
-		b.translation().z(),
-	};
-	double CAM_to_FOREARM_r [3] = {
-		cc_utils::rtod(ea.x()),
-		cc_utils::rtod(ea.y()),
-		cc_utils::rtod(ea.z())
-	};
+	double CAM_to_FOREARM_t [3];
+	double CAM_to_FOREARM_r [3];
+	cc_utils::invert_eul(
+		c_x, c_y, c_z, c_r, c_p, c_w, 
+		
+		CAM_to_FOREARM_t[0], CAM_to_FOREARM_t[1], CAM_to_FOREARM_t[2], 
+		CAM_to_FOREARM_r[0], CAM_to_FOREARM_r[1], CAM_to_FOREARM_r[2]
+	);
+	CAM_to_FOREARM_r[0] = cc_utils::rtod(CAM_to_FOREARM_r[0]);
+	CAM_to_FOREARM_r[1] = cc_utils::rtod(CAM_to_FOREARM_r[1]);
+	CAM_to_FOREARM_r[2] = cc_utils::rtod(CAM_to_FOREARM_r[2]);
 	
+	
+	//Print out transformed camera to forearm
+	/*printf(
+		"CAM_to_FOREARM_t xyz = (%f %f %f)\t\t rpy = (%f %f %f)\n",
+		CAM_to_FOREARM_t[0], CAM_to_FOREARM_t[1], CAM_to_FOREARM_t[2],
+		CAM_to_FOREARM_r[0], CAM_to_FOREARM_r[1], CAM_to_FOREARM_r[2]
+	);*/
+	//return 0;
 	
 	
 	//Initialize visualization.
@@ -489,22 +488,14 @@ int main(int argc, char** argv) {
     	
     	
     	//Convert the camera-to-forearm transform back into forearm-to-camera for easy comparison
-    	a = 
-		Eigen::AngleAxisd(cc_utils::dtor(CAM_to_FOREARM_r[0]), Eigen::Vector3d::UnitZ()) *
-   		Eigen::AngleAxisd(cc_utils::dtor(CAM_to_FOREARM_r[1]), Eigen::Vector3d::UnitY()) *
-   		Eigen::AngleAxisd(cc_utils::dtor(CAM_to_FOREARM_r[2]), Eigen::Vector3d::UnitX());
-   	a.translation() = Eigen::Vector3d(CAM_to_FOREARM_t[0], CAM_to_FOREARM_t[1], CAM_to_FOREARM_t[2]);
-   	
-   	b = a.inverse();
-   	ea = b.rotation().eulerAngles(2, 1, 0);
-   		
-   	double c_x_out = b.translation().x();
-   	double c_y_out = b.translation().y();
-   	double c_z_out = b.translation().z();
-   	double c_r_out = ea.x();
-   	double c_p_out = ea.y();
-   	double c_w_out = ea.z();
-   	
+    	double c_x_out, c_y_out, c_z_out, c_r_out, c_p_out, c_w_out;
+    	Eigen::Affine3d b = cc_utils::invert_eul(
+		CAM_to_FOREARM_t[0], CAM_to_FOREARM_t[1], CAM_to_FOREARM_t[2],
+		cc_utils::dtor(CAM_to_FOREARM_r[0]), cc_utils::dtor(CAM_to_FOREARM_r[1]), cc_utils::dtor(CAM_to_FOREARM_r[2]), 
+		
+		c_x_out, c_y_out, c_z_out, 
+		c_r_out, c_p_out, c_w_out
+	);
    	
    	//Output goodness-of-fit data
     	printf("\nCalibration complete.\n\n");

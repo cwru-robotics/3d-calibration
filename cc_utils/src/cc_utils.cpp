@@ -21,7 +21,7 @@ namespace cc_utils{
 			cv::namedWindow("Iteration Projection", CV_GUI_EXPANDED | CV_WINDOW_NORMAL);
 			cv::imshow("Iteration Projection", debug_mat);
 			cv::waitKey(1000);
-			//cv::imwrite("/home/tes77/dbg_img_" + std::to_string(cnt) + ".png", *debug_mat);
+			//cv::imwrite("/home/tes77/dbg_img_" + std::to_string(cnt) + ".png", debug_mat);
 			cnt++;
 			//cv::waitKey();
 			
@@ -83,5 +83,33 @@ namespace cc_utils{
 		p.SetParameterUpperBound(variable, 1,  180.0);
 		p.SetParameterLowerBound(variable, 2, -180.0);
 		p.SetParameterUpperBound(variable, 2,  180.0);
+	}
+	
+	
+	Eigen::Affine3d invert_eul(
+		const double & x_in, const double & y_in, const double & z_in, 
+		const double & r_in, const double & p_in, const double & w_in, 
+		
+		double & x_out, double & y_out, double & z_out, 
+		double & r_out, double & p_out, double & w_out
+	){
+		Eigen::Affine3d a;
+		a =
+			Eigen::AngleAxisd(r_in, Eigen::Vector3d::UnitZ()) *
+   			Eigen::AngleAxisd(p_in, Eigen::Vector3d::UnitY()) *
+   			Eigen::AngleAxisd(w_in, Eigen::Vector3d::UnitX());
+   		a.translation() = Eigen::Vector3d(x_in, y_in, z_in);
+   	
+   		Eigen::Affine3d b = a.inverse();
+   		Eigen::Vector3d ea = b.rotation().eulerAngles(2, 1, 0);
+   	
+		x_out = b.translation().x();
+		y_out = b.translation().y();
+		z_out = b.translation().z();
+		r_out = ea.x();
+		p_out = ea.y();
+		w_out = ea.z();
+		
+		return b;
 	}
 };

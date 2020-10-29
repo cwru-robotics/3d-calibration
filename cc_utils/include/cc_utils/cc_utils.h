@@ -143,4 +143,12 @@ namespace cc_utils{
 	}
 	
 	void bound_rotation(ceres::Problem & p, double * variable);
+	
+	Eigen::Affine3d invert_eul(
+		const double & x_in, const double & y_in, const double & z_in, 
+		const double & r_in, const double & p_in, const double & w_in, 
+		
+		double & x_out, double & y_out, double & z_out, 
+		double & r_out, double & p_out, double & w_out
+	); 
 }

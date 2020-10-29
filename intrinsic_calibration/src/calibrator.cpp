@@ -171,21 +171,11 @@ int main(int argc, char** argv) {
 		double MtC_init_w = position_file["mill_to_camera_guess_w"].as<double>();
 		
 		//Turn the user-friendly (and Gazebo-friendly) mill-to-camera guess into the necessary camera-to-mill format.
-		Eigen::Affine3d a;
-		a =
-			Eigen::AngleAxisd(MtC_init_r, Eigen::Vector3d::UnitZ()) *
-   			Eigen::AngleAxisd(MtC_init_p, Eigen::Vector3d::UnitY()) *
-   			Eigen::AngleAxisd(MtC_init_w, Eigen::Vector3d::UnitX());
-   		a.translation() = Eigen::Vector3d(MtC_init_x, MtC_init_y, MtC_init_z);
-   		Eigen::Affine3d b = a.inverse();
-   		
-   		CtM_init_x = b.translation().x();
-   		CtM_init_y = b.translation().y();
-   		CtM_init_z = b.translation().z();
-   		Eigen::Vector3d ea = b.rotation().eulerAngles(2, 1, 0);
-   		CtM_init_r = ea.x();
-   		CtM_init_p = ea.y();
-   		CtM_init_w = ea.z();
+		double CtM_init_x, CtM_init_y, CtM_init_z,	CtM_init_r, CtM_init_p, CtM_init_w;
+		cc_utils::invert_eul(
+			MtC_init_x, MtC_init_y, MtC_init_z,	MtC_init_r, MtC_init_p, MtC_init_w,
+			CtM_init_x, CtM_init_y, CtM_init_z,	CtM_init_r, CtM_init_p, CtM_init_w
+		);
    		
    		
 		//Millhead to target
@@ -198,6 +188,7 @@ int main(int argc, char** argv) {
 		trg_init_w = position_file["sled_to_target_guess_w"].as<double>();
 		
 		
+		//Pixel values
 		resolution_x = position_file["res_x"].as<int>();
 		resolution_y = position_file["res_y"].as<int>();
 		
@@ -324,21 +315,13 @@ int main(int argc, char** argv) {
     	ceres::Solve(options, &problem, &summary);
     	
     	//Convert the camera-to-mill transform back into mill-to-camera for easy comparison
-    	Eigen::Affine3d a;
-    	a = 
-		Eigen::AngleAxisd(cc_utils::dtor(CAM_to_MILL_r[0]), Eigen::Vector3d::UnitZ()) *
-   		Eigen::AngleAxisd(cc_utils::dtor(CAM_to_MILL_r[1]), Eigen::Vector3d::UnitY()) *
-   		Eigen::AngleAxisd(cc_utils::dtor(CAM_to_MILL_r[2]), Eigen::Vector3d::UnitX());
-   	a.translation() = Eigen::Vector3d(CAM_to_MILL_t[0], CAM_to_MILL_t[1], CAM_to_MILL_t[2]);
-   	Eigen::Affine3d b = a.inverse();
-   		
-   	double CtM_x = b.translation().x();
-   	double CtM_y = b.translation().y();
-   	double CtM_z = b.translation().z();
-   	Eigen::Vector3d ea = b.rotation().eulerAngles(2, 1, 0);
-   	double CtM_r = ea.x();
-   	double CtM_p = ea.y();
-   	double CtM_w = ea.z();
+    	double MtC_x, MtC_y, MtC_z,	MtC_r, MtC_p, MtC_w;
+	Eigen::Affine3d b = cc_utils::invert_eul(
+		CAM_to_MILL_t[0], CAM_to_MILL_t[1], CAM_to_MILL_t[2],
+		cc_utils::dtor(CAM_to_MILL_r[0]), cc_utils::dtor(CAM_to_MILL_r[0]), cc_utils::dtor(CAM_to_MILL_r[0]),
+		
+		MtC_x, MtC_y, MtC_z,	MtC_r, MtC_p, MtC_w
+	);
     	
     	//Calculate the RMS and display the values:
     	printf("\nCalibration complete.\n");
@@ -354,8 +337,8 @@ int main(int argc, char** argv) {
 	);
 	
 	std::printf("CAMERA to MILL:\n");
-	std::printf("\tx = \e[35m%f\e[36m\ty = \e[35m%f\e[36m\tz = \e[35m%f\e[36m\n", CtM_x, CtM_y, CtM_z);
-	std::printf("\tr = \e[35m%f\e[36m\tp = \e[35m%f\e[36m\tw = \e[35m%f\n\n", CtM_r, CtM_p, CtM_w);
+	std::printf("\tx = \e[35m%f\e[36m\ty = \e[35m%f\e[36m\tz = \e[35m%f\e[36m\n", MtC_x, MtC_y, MtC_z);
+	std::printf("\tr = \e[35m%f\e[36m\tp = \e[35m%f\e[36m\tw = \e[35m%f\n\n", MtC_r, MtC_p, MtC_w);
 	std::printf("\t%f\t%f\t%f\t%f\n", b.matrix()(0, 0), b.matrix()(0, 1), b.matrix()(0, 2), b.matrix()(0, 3));
 	std::printf("\t%f\t%f\t%f\t%f\n", b.matrix()(1, 0), b.matrix()(1, 1), b.matrix()(1, 2), b.matrix()(1, 3));
 	std::printf("\t%f\t%f\t%f\t%f\n", b.matrix()(2, 0), b.matrix()(2, 1), b.matrix()(2, 2), b.matrix()(2, 3));

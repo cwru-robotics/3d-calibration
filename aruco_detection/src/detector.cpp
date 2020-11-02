@@ -13,8 +13,6 @@ bool find_aruco(
 ){
 	//TODO This is not the fastest thing.
 	cv::Ptr<cv::aruco::DetectorParameters> aruco_params = cv::aruco::DetectorParameters::create();
-	//TODO investigate why subpix detection is not working. OCV version issue??
-	//aruco_params->cornerRefinementMethod = cv::aruco::CORNER_REFINE_SUBPIX;
 	cv::Ptr<cv::aruco::Dictionary> aruco_dict = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_250);
 
 	std::vector<int> aruco_ids;
@@ -32,7 +30,15 @@ bool find_aruco(
 		return false;
 	}
 	
-	for(int i = 0; i < 4; i++){//The system always returns four corners
+	cv::Mat colormode;
+	cv::cvtColor(source_img, colormode, cv::COLOR_RGB2GRAY);
+	
+	cv::TermCriteria tc(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 100, 1.0);
+	cv::cornerSubPix(colormode, aruco_corners[our_id], cv::Size(5, 5), cv::Size(-1, -1), tc);
+	
+	for(int i = 0; i < 4; i++){//The system always returns four corners 
+	
+	
 		//Corners go clockwise from the top left
 		cv::circle(debug_img, aruco_corners[our_id][i], 2, cv::Scalar(0,0,255), 2);
 		

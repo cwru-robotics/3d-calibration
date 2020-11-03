@@ -216,7 +216,8 @@ public:
 			u, v
 		);
 		
-		//printf("Real u, v: (%f, %f)\n", image_pixels[0], image_pixels[1]);
+		/*printf("\nReal u, v: (%f, %f)\n", image_pixels[0], image_pixels[1]);
+		printf("Calc u, v: (%f, %f)\n", cc_utils::val(u), cc_utils::val(v));*/
 		
 		cc_utils::add_to_visualization(cc_utils::val(u), cc_utils::val(v), image_pixels[0], image_pixels[1]);
 		
@@ -425,8 +426,8 @@ int main(int argc, char** argv) {
 		"CAM_to_FOREARM_t xyz = (%f %f %f)\t\t rpy = (%f %f %f)\n",
 		CAM_to_FOREARM_t[0], CAM_to_FOREARM_t[1], CAM_to_FOREARM_t[2],
 		CAM_to_FOREARM_r[0], CAM_to_FOREARM_r[1], CAM_to_FOREARM_r[2]
-	);*/
-	//return 0;
+	);
+	return 0;*/
 	
 	
 	//Initialize visualization.

@@ -95,9 +95,9 @@ namespace cc_utils{
 	){
 		Eigen::Affine3d a;
 		a =
-			Eigen::AngleAxisd(r_in, Eigen::Vector3d::UnitZ()) *
+			Eigen::AngleAxisd(w_in, Eigen::Vector3d::UnitZ()) *
    			Eigen::AngleAxisd(p_in, Eigen::Vector3d::UnitY()) *
-   			Eigen::AngleAxisd(w_in, Eigen::Vector3d::UnitX());
+   			Eigen::AngleAxisd(r_in, Eigen::Vector3d::UnitX());
    		a.translation() = Eigen::Vector3d(x_in, y_in, z_in);
    	
    		Eigen::Affine3d b = a.inverse();
@@ -106,9 +106,9 @@ namespace cc_utils{
 		x_out = b.translation().x();
 		y_out = b.translation().y();
 		z_out = b.translation().z();
-		r_out = ea.x();
+		r_out = ea.z();
 		p_out = ea.y();
-		w_out = ea.z();
+		w_out = ea.x();
 		
 		return b;
 	}

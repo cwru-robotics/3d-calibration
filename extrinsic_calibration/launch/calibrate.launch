@@ -11,7 +11,7 @@
 	/>
 	<arg
 		name="intrinsics"
-		default="$(find cam_cal)/calibrations/stella_calibrated.yml"
+		default="$(find cam_cal)/calibrations/stella_sim.yml"
 		doc="Calibration file which contains camera intrinsics."
 	/>
 	<arg

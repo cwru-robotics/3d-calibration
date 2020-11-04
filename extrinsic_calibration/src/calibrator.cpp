@@ -240,9 +240,9 @@ int main(int argc, char** argv) {
 	char * output;
 	if(argc < 5){
 		printf("\nNo designated output file given, calibrated data will be displayed and then discarded.\n");
-		output = argv[3];
-	} else {
 		output = NULL;
+	} else {
+		output = argv[4];
 	}
 	
 	
@@ -563,6 +563,15 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 	
+	printf("\nWriting transform information to %s.\n", output);
+	std::ofstream lf_os(output);
+	lf_os << "<launch>\n";
+	lf_os << "	<node pkg=\"tf\" type=\"static_transform_publisher\" name=\"stf\" args=\"";
+	lf_os << c_x_out << " " << c_y_out << " " << c_z_out << " ";
+	lf_os << c_r_out << " " << c_p_out << " " << c_w_out;
+	lf_os << " forearm camera_corrected 1000\"/>\n";
+	lf_os << "</launch>";
+	lf_os.close();
 	
 
 	return 0;

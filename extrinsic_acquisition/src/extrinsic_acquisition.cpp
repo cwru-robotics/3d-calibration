@@ -90,8 +90,8 @@ int main(int argc, char ** argv){
 	camera_of << "k1: " << ci.D[0] << "\n";
 	camera_of << "k2: " << ci.D[1] << "\n";
 	camera_of << "k3: " << ci.D[4] << "\n";
-	camera_of << "p1: " << ci.K[2] << "\n";
-	camera_of << "p2: " << ci.K[3] << "\n";
+	camera_of << "p1: " << ci.D[2] << "\n";
+	camera_of << "p2: " << ci.D[3] << "\n";
 	camera_of.close();
 	
 	

@@ -120,14 +120,14 @@ int main(int argc, char ** argv){
 	 go::g_pub_simu = & sim_trajectory_pub;
 	
 	//Check positions
-	/*printf("\nChecking if robot is near home position... ");
+	printf("\nChecking if robot is near home position... ");
 	for(int i = 0; i < N_JOINTS; i++){
 		if(abs(home_pose[i] - most_recent_joints[i]) > 0.1){
 			printf("\n\e[31mJoint %d is not within 0.1 of home.\e[0m\n", i);
 			return 0;
 		}
 	}
-	printf("Done.\n");*/
+	printf("Done.\n");
 	
 	
 	//Open the position output.

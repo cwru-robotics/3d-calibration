@@ -573,6 +573,51 @@ int main(int argc, char** argv) {
 	lf_os << "</launch>";
 	lf_os.close();
 	
+	lf_os = std::ofstream(std::string(output) + ".yml");
+	
+	lf_os << "t_x: " << BASE_to_TOP_t[0] << "\n";
+	lf_os << "t_y: " << BASE_to_TOP_t[1] << "\n";
+	lf_os << "t_z: " << BASE_to_TOP_t[2] << "\n";
+	lf_os << "t_r: " << cc_utils::dtor(BASE_to_TOP_r[0]) << "\n";
+	lf_os << "t_p: " << cc_utils::dtor(BASE_to_TOP_r[1]) << "\n";
+	lf_os << "t_w: " << cc_utils::dtor(BASE_to_TOP_r[2]) << "\n";
+	
+	lf_os << "b_x: " << BASE_to_BOT_t[0] << "\n";
+	lf_os << "b_y: " << BASE_to_BOT_t[1] << "\n";
+	lf_os << "b_z: " << BASE_to_BOT_t[2] << "\n";
+	lf_os << "b_r: " << cc_utils::dtor(BASE_to_BOT_r[0]) << "\n";
+	lf_os << "b_p: " << cc_utils::dtor(BASE_to_BOT_r[1]) << "\n";
+	lf_os << "b_w: " << cc_utils::dtor(BASE_to_BOT_r[2]) << "\n";
+	
+	lf_os << "c_x: " << c_x_out << "\n";
+	lf_os << "c_y: " << c_y_out << "\n";
+	lf_os << "c_z: " << c_z_out << "\n";
+	lf_os << "c_r: " << c_r_out << "\n";
+	lf_os << "c_p: " << c_p_out << "\n";
+	lf_os << "c_w: " << c_w_out << "\n";
+	
+	lf_os << "t_delta_r: " << drift_top_r << "\n";
+	lf_os << "t_delta_m: " << drift_top_m << "\n";
+	
+	lf_os << "b_delta_r: " << drift_bot_r << "\n";
+	lf_os << "b_delta_m: " << drift_bot_m << "\n";
+	
+	double drift_cam_m = sqrt(
+   		pow(c_x_out - c_x, 2) +
+   		pow(c_y_out - c_y, 2) +
+   		pow(c_z_out - c_z, 2)
+   	);
+   	double drift_cam_r = sqrt(
+   		pow(c_r_out - c_r, 2) +
+   		pow(c_p_out - c_p, 2) +
+   		pow(c_w_out - c_w, 2)
+   	);
+	lf_os << "c_delta_r: " << drift_cam_r << "\n";
+	lf_os << "c_delta_m: " << drift_cam_m << "\n";
+	
+	lf_os << "rms: " << cc_utils::rms() << "\n";
+	
+	lf_os.close();
 
 	return 0;
 }

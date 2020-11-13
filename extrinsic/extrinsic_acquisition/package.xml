@@ -2,7 +2,7 @@
 <package>
 	<name>extrinsic_acquisition</name>
 	<version>1.0.0</version>
-	<description>Image data acquisition utility for arm and LIDAR extrinsic calibration.</description>
+	<description>Image data acquisition utility for camera extrinsic calibration.</description>
 	<maintainer email="tes77@case.edu">Tom Shkurti</maintainer>
 	<!--What is roadprintz's code licensed as?-->
 	<license>TODO</license>

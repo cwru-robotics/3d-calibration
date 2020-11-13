@@ -7,6 +7,7 @@
 namespace go{
 	TrajectoryUtils g_trajectory_utils;
 	Eigen::VectorXd g_q_vec_arm_Xd(6);
+	Eigen::VectorXd home_pose;
 	vector<int> g_arm_joint_indices;
 	vector<string> g_ur_jnt_names = {
 		"joint_1_s", "joint_2_l", "joint_3_u", "joint_4_r", "joint_5_b", "joint_6_t",

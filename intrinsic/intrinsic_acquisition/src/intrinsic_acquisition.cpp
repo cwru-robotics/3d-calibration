@@ -26,7 +26,7 @@ void topic_thread(double x, double y, double z){
 	srv.request.x = x;
 	srv.request.y = y;
 	srv.request.theta = z;
-	while(!ros::service::call("/motion_command", srv) && ! ros::ok()){
+	while(!ros::service::call("/motion_command", srv) && ros::ok()){
 		ros::spinOnce();
 	}
 	ready_to_record = true;

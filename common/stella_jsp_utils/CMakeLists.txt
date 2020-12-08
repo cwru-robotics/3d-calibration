@@ -18,3 +18,6 @@ catkin_package(
 
 add_library(stella_jsp_utils src/stella_jsp_utils.cpp)
 target_link_libraries(stella_jsp_utils ${catkin_LIBRARIES})
+
+add_executable(go src/go.cpp)
+target_link_libraries(go stella_jsp_utils ${catkin_LIBRARIES})

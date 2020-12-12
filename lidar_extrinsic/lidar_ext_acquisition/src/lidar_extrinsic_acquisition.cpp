@@ -114,9 +114,9 @@ int main(int argc, char ** argv){
 	//Save camera info so that we know how the images were generated.
 	printf("\nLooking for topic camera/camera_info... ");
 	sensor_msgs::CameraInfo ci = *(ros::topic::waitForMessage<sensor_msgs::CameraInfo>("camera/camera_info", nh));
-	printf("Done.\n\e[1mWriting to %s.\e[0m\n", argv[3]);
+	printf("Done.\n\e[1mWriting to %s.\e[0m\n", argv[4]);
 	std::ofstream camera_of = std::ofstream();
-	camera_of.open(argv[3]);
+	camera_of.open(argv[4]);
 	camera_of << "fx: " << ci.K[0] << "\n";
 	camera_of << "fy: " << ci.K[4] << "\n";
 	camera_of << "cx: " << ci.K[2] << "\n";
@@ -176,12 +176,12 @@ int main(int argc, char ** argv){
 	
 	//Open the position output.
 	std::ofstream frame_output;
-	frame_output.open(argv[4]);
+	frame_output.open(argv[3]);
 	if(!frame_output){
 		ROS_ERROR("Error: frame output file %s could not be opened.\n", argv[4]);
 		return 0;
 	}
-	printf("\nWriting positional output to \e[1m%s\e[0m.\n", argv[4]);
+	printf("\nWriting positional output to \e[1m%s\e[0m.\n", argv[3]);
 	
 	//Move to the locations.
 	printf("\nReady to move to poses.\n");
@@ -257,7 +257,10 @@ int main(int argc, char ** argv){
 				Eigen::Matrix4d m = a.matrix();
 				for(int r = 0; r < 4; r++){
 					for(int c = 0; c < 4; c++){
-						frame_output << std::to_string(m(r, c)) << ", ";
+						frame_output << std::to_string(m(r, c));
+						if(c < 3 || r < 3){
+							frame_output << ", ";
+						}
 					}
 				}
 				frame_output << "\n";

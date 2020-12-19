@@ -33,20 +33,18 @@ bool recent_laser;
 std::string pc_file;
 void CB_laser(const sensor_msgs::LaserScan::ConstPtr ls){
 	if(!recent_laser){
-		pcl::PointCloud<pcl::PointXYZRGB> pcl_cloud;
+		pcl::PointCloud<pcl::PointXYZI> pcl_cloud;
 		float ang = ls->angle_min;
+		
 		for(int i = 0; i < ls->ranges.size(); i++){
-			pcl::PointXYZRGB p_tmp(
-				(int)(ls->intensities[i] * 255),
-				(int)(ls->intensities[i] * 255),
-				(int)(ls->intensities[i] * 255)
-			);
+			pcl::PointXYZI p_tmp(ls->intensities[i]);
 			
 			p_tmp.x = std::cos(ang) * ls->ranges[i];
 			p_tmp.y = std::sin(ang) * ls->ranges[i];
 			p_tmp.z = 0.0;
 			
 			pcl_cloud.push_back(p_tmp);
+			ang += ls->angle_increment;
 		}
 		if(!pc_file.empty()){
 			printf("Saving pcd to %s\n", pc_file.c_str());

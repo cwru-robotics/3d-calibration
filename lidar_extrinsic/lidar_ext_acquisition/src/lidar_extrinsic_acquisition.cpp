@@ -39,8 +39,8 @@ void CB_laser(const sensor_msgs::LaserScan::ConstPtr ls){
 		for(int i = 0; i < ls->ranges.size(); i++){
 			pcl::PointXYZI p_tmp(ls->intensities[i]);
 			
-			p_tmp.x = std::cos(ang) * ls->ranges[i];
-			p_tmp.y = std::sin(ang) * ls->ranges[i];
+			p_tmp.x = std::sin(ang) * ls->ranges[i];
+			p_tmp.y = std::cos(ang) * ls->ranges[i];
 			p_tmp.z = 0.0;
 			
 			pcl_cloud.push_back(p_tmp);

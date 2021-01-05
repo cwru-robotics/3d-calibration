@@ -15,13 +15,13 @@ catkin_package(
 	LIBRARIES circle_detector
 )
 
-add_library(circle_detector src/circle_detector.cpp)  
-target_link_libraries(circle_detector ${OpenCV_LIBS} ${catkin_LIBRARIES})
+add_library(circle_detector_tes src/circle_detector.cpp)  
+target_link_libraries(circle_detector_tes ${OpenCV_LIBS} ${catkin_LIBRARIES})
 
 add_executable(dots_detector src/detector.cpp)
 target_link_libraries(dots_detector
 	${OpenCV_LIBS}
 	${catkin_LIBRARIES}
 	yaml-cpp
-	circle_detector
+	circle_detector_tes
 )

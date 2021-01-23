@@ -1,0 +1,10 @@
+<launch>
+	<node
+		name="testee"
+		type="test_single_corner"
+		pkg="single_corner"
+		output="screen"
+		required="true"
+		args="$(find single_corner)/data/checkercross.png"
+	/>
+</launch>

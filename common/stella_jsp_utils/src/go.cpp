@@ -25,7 +25,7 @@ int main(int argc, char ** argv){
 	}
 	printf("Done.\n");
 	
-	std::vector<double> target = {std::stod(argv[1]), std::stod(argv[2]), std::stod(argv[3]), std::stod(argv[4]), 0, 0};
+	std::vector<double> target = {std::stod(argv[1]), std::stod(argv[2]), std::stod(argv[3]), std::stod(argv[4]), std::stod(argv[5]), std::stod(argv[6])};
 	
 	go::go_to(target);
 

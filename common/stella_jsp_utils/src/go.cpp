@@ -1,7 +1,7 @@
 #include <stella_jsp_utils/stella_jsp_utils.h>
 
 int main(int argc, char ** argv){
-	if(argc < 5){
+	if(argc < 6){
 		printf("Not enough args.\n");
 		return 0;
 	}
@@ -9,6 +9,10 @@ int main(int argc, char ** argv){
 	//ROS initialization
 	ros::init(argc, argv, "extrinsic_acquisition");
 	ros::NodeHandle nh;
+	
+	if(argc == 8){
+		ros::Duration(std::stod(argv[7])).sleep();
+	}
 	
 	//Set up publishers.
 	ros::Publisher irl_trajectory_pub = nh.advertise<trajectory_msgs::JointTrajectory>("/joint_path_command", 1);

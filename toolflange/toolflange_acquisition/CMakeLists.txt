@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(toolflange_acquisition)
 
-find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
 	roscpp
-	cv_bridge
+	pcl_ros
 	xform_utils
 	trajectory_utils
 	stella_jsp_utils
@@ -21,4 +20,4 @@ catkin_package(
 )
 
 add_executable(toolflange_acquisition src/toolflange_acquisition.cpp)
-target_link_libraries(toolflange_acquisition ${OpenCV_LIBS} ${catkin_LIBRARIES} yaml-cpp)
+target_link_libraries(toolflange_acquisition ${catkin_LIBRARIES} yaml-cpp)

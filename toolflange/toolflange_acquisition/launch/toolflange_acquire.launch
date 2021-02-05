@@ -1,0 +1,20 @@
+<launch>
+	<arg
+		name="img_location"
+		default="$(find toolflange_acquisition)/data/"
+		doc="Place to put the captured images."
+	/>
+	<arg
+		name="pose_location"
+		default="$(find toolflange_acquisition)/data/poses.csv"
+		doc="Place to save recorded poses."
+	/>
+
+	<node
+		name="acquisition"
+		pkg="toolflange_acquisition"
+		type="toolflange_acquisition"
+		args="$(arg img_location) $(arg pose_location)"
+		output="screen"
+	/>
+</launch>

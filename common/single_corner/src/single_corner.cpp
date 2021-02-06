@@ -16,7 +16,7 @@ namespace sc{
 		cv::normalize(img_corner, img_corner_normed, 0, 1.0, cv::NORM_MINMAX, CV_32FC1, cv::Mat());
 		
 		cv::Mat corner_threshold;
-		cv::threshold(img_corner_normed, corner_threshold, 0.8, 0.0, cv::THRESH_TOZERO);
+		cv::threshold(img_corner_normed, corner_threshold, 0.95, 0.0, cv::THRESH_TOZERO);
 		
 		/*cv::imshow("GS", img_grayscale);
 		cv::waitKey();

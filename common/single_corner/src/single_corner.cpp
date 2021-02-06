@@ -25,7 +25,6 @@ namespace sc{
 		cv::imshow("THRESH", corner_threshold);
 		cv::waitKey();*/
 		
-		printf("Beginning loop\n");
 		cv::Point2d wavg = {0.0, 0.0};
 		double sum = 0.0;
 		for(int x = 0; x < corner_threshold.cols; x++){
@@ -34,8 +33,7 @@ namespace sc{
 				sum += corner_threshold.at<float>(y, x);
 			}
 		}
-		
-		printf("Past loop\n");
+
 		
 		wavg /= sum;
 		

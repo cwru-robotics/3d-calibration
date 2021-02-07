@@ -12,11 +12,20 @@ namespace sc{
 		cv::Mat img_corner;
 		cv::cornerHarris(img_grayscale, img_corner, 2, 3, 0.04);
 		
+		//Sometimes (especially in reconstructed PCL images) there are
+		//corner-like artifacts at the very edges. So we just crop those
+		//out. It's not like POIs should be anywhere near the edges of
+		//image anyway.
+		cv::Mat img_cropped = img_corner(cv::Rect(
+			10, 10,
+			img_corner.cols - 20, img_corner.rows - 20
+		));
+		
 		cv::Mat img_corner_normed;
-		cv::normalize(img_corner, img_corner_normed, 0, 1.0, cv::NORM_MINMAX, CV_32FC1, cv::Mat());
+		cv::normalize(img_cropped, img_corner_normed, 0, 1.0, cv::NORM_MINMAX, CV_32FC1, cv::Mat());
 		
 		cv::Mat corner_threshold;
-		cv::threshold(img_corner_normed, corner_threshold, 0.95, 0.0, cv::THRESH_TOZERO);
+		cv::threshold(img_corner_normed, corner_threshold, 0.9, 0.0, cv::THRESH_TOZERO);
 		
 		/*cv::imshow("GS", img_grayscale);
 		cv::waitKey();
@@ -36,6 +45,9 @@ namespace sc{
 
 		
 		wavg /= sum;
+		
+		//Undo the displacement caused by the crop.
+		wavg += {10.0, 10.0};
 		
 		return wavg;
 	}

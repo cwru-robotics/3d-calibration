@@ -156,7 +156,7 @@ int main(int argc, char ** argv){
 		int ind_v = (int)trunc(corner_in_image_space.y);
 		pcl::PointXYZRGB p = vec_of_pcls[i][cloud_indices[ind_v][ind_u]];
 		
-		detections_out << arm_positions_vector[i] << ", ";
+		detections_out << arm_positions_vector[i];
 		detections_out << p.x << ", " << p.y << ", " << p.z << "\n";
 		
 		printf(" DONE\n");

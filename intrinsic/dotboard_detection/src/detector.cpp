@@ -64,6 +64,12 @@ int main(int argc, char** argv) {
 	}
 	std::string sled_z = data_file["sled_z"].as<std::string>();
 	
+	if(!data_file["circles"]){
+		printf("\e[31mTDF \"%s\" is missing its circles versus checks field.\e[39m\n", argv[1]);
+		return 0;
+	}
+	bool circles = data_file["circles"].as<bool>();
+	
 	if(
 		sled_x.length() != 2 ||
 		(sled_x[0] != 'x' && sled_x[0] != 'y' && sled_x[0] != 'z') ||
@@ -154,7 +160,12 @@ int main(int argc, char** argv) {
 		
 		image = vec_of_images[i_image];
 		cv::cvtColor(image, grayscaleImage, CV_BGR2GRAY);
-		bool patternfound = findCirclesGrid(grayscaleImage, patternsize, centers, 1, circle_detector_ptr_);
+		bool patternfound;
+		if(circles){
+			patternfound = findCirclesGrid(grayscaleImage, patternsize, centers, 1, circle_detector_ptr_);
+		} else{
+			patternfound = cv::findChessboardCorners(grayscaleImage, patternsize, centers);
+		}
 		
 		if (patternfound) {
 			printf("\tPattern found in image %d.\n", i_image + 1);
@@ -218,21 +229,42 @@ int main(int argc, char** argv) {
 			//TODO Add some kind of check to make sure axes are sane??
 			
 			//For each point...
-			cv::Point2f center;
-			for (int i_circle = 0; i_circle < target_x; i_circle++){
-				for (int j_circle = 0; j_circle < target_y; j_circle++) {
-					//Draw on the image
-					int n_circle = i_circle + j_circle*target_y;
-					center = centers[n_circle];
-					cv::circle( image, center, 2, cv::Scalar(0,0,255), 2);
-			
-					//Write the data.
-					//FORMAT: u, v, target_x, target_y, camera_x, camera_y, camera_z
-					calib_output_file <<
-						center.x << ", " << center.y << ", " <<
-						i_circle * target_spacing << ", " << j_circle * target_spacing << ", " <<
-						camera_x << ", " << camera_y << ", " << camera_z << "\n"
-					;
+			if(circles){
+				cv::Point2f center;
+				for (int i_circle = 0; i_circle < target_x; i_circle++){
+					for (int j_circle = 0; j_circle < target_y; j_circle++) {
+						//Draw on the image
+						int n_circle = i_circle + j_circle*target_y;
+						center = centers[n_circle];
+						cv::circle( image, center, 2, cv::Scalar(0,0,255), 2);
+				
+						//Write the data.
+						//FORMAT: u, v, target_x, target_y, camera_x, camera_y, camera_z
+						calib_output_file <<
+							center.x << ", " << center.y << ", " <<
+							i_circle * target_spacing << ", " << j_circle * target_spacing << ", " <<
+							camera_x << ", " << camera_y << ", " << camera_z << "\n"
+						;
+					}
+				}
+			} else{
+				cv::drawChessboardCorners(image, patternsize, centers, true);
+				cv::Point2f center;
+				for (int i_circle = 0; i_circle < target_y; i_circle++){
+					for (int j_circle = 0; j_circle < target_x; j_circle++) {
+						//Draw on the image
+						int n_circle = i_circle*target_x + j_circle;
+						center = centers[n_circle];
+						cv::circle( image, center, 2, cv::Scalar(0,0,255), 2);
+				
+						//Write the data.
+						//FORMAT: u, v, target_x, target_y, camera_x, camera_y, camera_z
+						calib_output_file <<
+							center.x << ", " << center.y << ", " <<
+							i_circle * target_spacing << ", " << j_circle * target_spacing << ", " <<
+							camera_x << ", " << camera_y << ", " << camera_z << "\n"
+						;
+					}
 				}
 			}
 			

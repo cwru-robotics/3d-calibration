@@ -280,7 +280,7 @@ int main(int argc, char** argv) {
 	
 	printf(
 		"\n\e[36mDetection process complete. \e[1m%d / %d\e[39m\e[36m patterns not found (\e[1m%f%%\e[36m).\e[39m\n\n",
-		failures, n_images, (float)failures/(float)n_images
+		failures, n_images, 100.0 * (float)failures/(float)n_images
 	);
 	calib_output_file.close();
 	

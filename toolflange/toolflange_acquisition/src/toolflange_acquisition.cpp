@@ -78,7 +78,7 @@ int main(int argc, char ** argv){
 	XformUtils xfu;
 	int n = 20;
 	for(int i = 0; i < n; i++){
-		printf("%f%%:\t", 100.0 * (float)i/(float)n);
+		printf("%f%%:\t", 50.0 * (float)i/(float)n);
 		std::cout.flush();
 		
 		goal_pose[5] = ((double)i) / ((double)n) * 2.0 * M_PI;
@@ -92,6 +92,59 @@ int main(int argc, char ** argv){
 		std::cout.flush();
 		new_pcl = false;
 		save_position = std::string(argv[1]) + "pcl_" + std::to_string(i) + ".pcd";
+		while(!new_pcl && ros::ok()){
+			ros::spinOnce();
+		}
+		
+		
+		//Acquire transform
+		printf("Acquiring transform...\t");
+		std::cout.flush();
+		bool got_pose = false;
+		while (!got_pose && ros::ok()) {
+			try {
+				tfl.lookupTransform("/tool0_link", "/base_link", ros::Time(0), transform);
+
+				Eigen::Affine3d a = xfu.transformTFToAffine3d(transform);
+				Eigen::Matrix4d m = a.matrix();
+
+				for(int r = 0; r < 4; r++){
+					for(int c = 0; c < 4; c++){
+						frame_output << std::to_string(m(r, c)) << ", ";
+					}
+				}
+				frame_output << "\n";
+				frame_output.flush();
+				got_pose = true;
+
+			} catch (tf::TransformException ex) {
+				ROS_WARN("%s", ex.what());
+				ros::Duration(1.0).sleep();
+				ros::spinOnce();
+			}
+		}
+		
+        	printf("Done.\n");
+	}
+	
+	goal_pose[1] += 0.01;
+	goal_pose[2] -= 0.01;
+	
+	for(int i = 0; i < n; i++){
+		printf("%f%%:\t", (50.0 * (float)i/(float)n) + 50.0);
+		std::cout.flush();
+		
+		goal_pose[5] = ((double)i) / ((double)n) * 2.0 * M_PI;
+		
+		printf("Moving...\t");
+		go::go_to(goal_pose);
+		std::cout.flush();
+		
+		//Acquire image
+		printf("Imaging...\t");
+		std::cout.flush();
+		new_pcl = false;
+		save_position = std::string(argv[1]) + "pcl_" + std::to_string(i+20) + ".pcd";
 		while(!new_pcl && ros::ok()){
 			ros::spinOnce();
 		}

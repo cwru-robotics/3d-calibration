@@ -70,6 +70,7 @@ int main(int argc, char ** argv){
 			&(arm_entry[2]), &(arm_entry[3]),
 			&(arm_entry[4]), &(arm_entry[5])
 		);
+		arm_entry[3]-=1.570;
 		poses_to_visit.push_back(arm_entry);
 	}
 	printf("\n\e[1mRead in %d poses to visit from %s.\e[0m\n", n, argv[1]);
@@ -120,14 +121,14 @@ int main(int argc, char ** argv){
 	 go::g_pub_simu = & sim_trajectory_pub;
 	
 	//Check positions
-	printf("\nChecking if robot is near home position... ");
+	/*printf("\nChecking if robot is near home position... ");
 	for(int i = 0; i < VECTOR_DIM; i++){
 		if(abs(go::home_pose[i] - go::g_q_vec_arm_Xd[i]) > 0.1){
 			printf("\n\e[31mJoint %d is not within 0.1 of home.\e[0m\n", i);
 			return 0;
 		}
 	}
-	printf("Done.\n");
+	printf("Done.\n");*/
 	
 	
 	//Open the position output.
@@ -186,11 +187,11 @@ int main(int argc, char ** argv){
 				frame_output.flush();
 				got_pose = true;
 
-				} catch (tf::TransformException ex) {
-					ROS_WARN("%s", ex.what());
-					ros::Duration(1.0).sleep();
-					ros::spinOnce();
-				}
+			} catch (tf::TransformException ex) {
+				ROS_WARN("%s", ex.what());
+				ros::Duration(1.0).sleep();
+				ros::spinOnce();
+			}
 		}
 		
 		

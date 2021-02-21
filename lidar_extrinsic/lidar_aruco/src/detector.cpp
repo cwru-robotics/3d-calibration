@@ -267,9 +267,18 @@ int main(int argc, char ** argv){
 				transformed_clouds[c][p].y = y_tmp;
 				transformed_clouds[c][p].z = z_tmp;
 			}
+			
+			
 		}
 		printf("DONE\n");
 		
+		//Debug code: push all the combined points into one PCD and save it
+		//This can then be published and viewed with PCD_utils and RVIZ.
+		pcl::PointCloud<pcl::PointXYZI> mondo;
+		for(int c = 0; c < n_pcds; c++){
+			mondo += transformed_clouds[c];
+		}
+		pcl::io::savePCDFileASCII(folder + "/debug_pcd.pcd", mondo);
 		
 		printf("\tProjecting...\t\t\t\t");
 		
@@ -296,6 +305,8 @@ int main(int argc, char ** argv){
 			contributions[r] = std::vector<std::vector<double> >(vec_of_images[i].cols);
 		}
 		
+		cv::Mat projection = cv::Mat(vec_of_images[i].rows, vec_of_images[i].cols, CV_8UC1);
+		
 		//Project the points into the lookup tables.
 		for(int c = 0; c < n_pcds; c++){
 			for(int p = 0; p < transformed_clouds[c].size(); p++){
@@ -309,21 +320,9 @@ int main(int argc, char ** argv){
 		
 					u, v
 				);
+				printf("%f, %f\n", u, v);
 			}
 		}
-		
-		
-		cv::Mat projection = cv::Mat(vec_of_images[i].rows, vec_of_images[i].cols, CV_8UC1);
-		
-		
-		//Debug code: push all the combined points into one PCD and save it
-		//This can then be published and viewed with PCD_utils and RVIZ.
-		pcl::PointCloud<pcl::PointXYZI> mondo;
-		for(int c = 0; c < n_pcds; c++){
-			mondo += transformed_clouds[c];
-		}
-		pcl::io::savePCDFileASCII(folder + "/debug_pcd.pcd", mondo);
-		
 		
 		printf("DONE\n");
 		

@@ -1,19 +1,19 @@
-resolution_u: 2304
-resolution_v: 1296
-fx: 1600.0
-fy: 1600.0
-cx: 1152
-cy: 648
+resolution_u: 640
+resolution_v: 480
+fx: 534
+fy: 534
+cx: 309
+cy: 238
 
-k1: -0.433351
-k2:  0.257538
-k3: -0.090683
-p1:  0.000512
-p2:  0.000263
+k1: -0.1623
+k2:  0.4
+k3: -0.04
+p1: -0.00154
+p2:  0.0067
 
-mill_to_camera_x: -0.102
-mill_to_camera_y:  0.017
-mill_to_camera_z: -0.4
+mill_to_camera_x:  0.0
+mill_to_camera_y:  0.05
+mill_to_camera_z: -0.12
 mill_to_camera_r: 0
 mill_to_camera_p: 0
 mill_to_camera_w: 0

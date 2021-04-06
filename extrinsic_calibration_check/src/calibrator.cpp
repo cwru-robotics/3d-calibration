@@ -9,11 +9,6 @@
 
 #include <cc_utils/cc_utils.h>
 
-//Distance from center to one edge of marker
-//Markers are 6in across so 3in -> meters
-//TODO Eventually this will need to be parametrized
-#define ARUCO_MARKER_SIZE 0.0762
-
 //Y dis not a standard function??
 std::string ReplaceString(
 	std::string subject,
@@ -82,32 +77,6 @@ public:
 		
 		T* residual
 	) const {
-		/*std::cout << "INITIAL BTT T:\n";
-		std::cout << BASE_to_TOP_translation[0] << "\n";
-		std::cout << BASE_to_TOP_translation[1] << "\n";
-		std::cout << BASE_to_TOP_translation[2] << "\n\n";
-		std::cout << "INITIAL BTT R:\n";
-		std::cout << BASE_to_TOP_rotation[0] << "\n";
-		std::cout << BASE_to_TOP_rotation[1] << "\n";
-		std::cout << BASE_to_TOP_rotation[2] << "\n\n";
-		std::cout << "INITIAL BTB T:\n";
-		std::cout << BASE_to_BOT_translation[0] << "\n";
-		std::cout << BASE_to_BOT_translation[1] << "\n";
-		std::cout << BASE_to_BOT_translation[2] << "\n\n";
-		std::cout << "INITIAL BTB R:\n";
-		std::cout << BASE_to_BOT_rotation[0] << "\n";
-		std::cout << BASE_to_BOT_rotation[1] << "\n";
-		std::cout << BASE_to_BOT_rotation[2] << "\n\n";
-		std::cout << "INITIAL CAM T:\n";
-		std::cout << CAM_to_FOREARM_translation[0] << "\n";
-		std::cout << CAM_to_FOREARM_translation[1] << "\n";
-		std::cout << CAM_to_FOREARM_translation[2] << "\n\n";
-		std::cout << "INITIAL CAM R:\n";
-		std::cout << CAM_to_FOREARM_rotation[0] << "\n";
-		std::cout << CAM_to_FOREARM_rotation[1] << "\n";
-		std::cout << CAM_to_FOREARM_rotation[2] << "\n\n";*/
-	
-	
 		//CAM_to_POINT = CAM_to_FOREARM TARGET_POINT
 		
 		
@@ -118,10 +87,20 @@ public:
 			T(target_point[2]),
 		};
 		
+		/*std::cout << "TARGET POINT\n";
+		std::cout << "\t" << TARGET_POINT[0] << "\n";
+		std::cout << "\t" << TARGET_POINT[1] << "\n";
+		std::cout << "\t" << TARGET_POINT[2] << "\n";*/
 		
 		//1: BASE_to_POINT = BASE_to_TARGET * TARGET_to_POINT
 		T CAM_to_POINT [3];
 		cc_utils::transformPoint_euler(CAM_to_SYSREF_translation, CAM_to_SYSREF_rotation, TARGET_POINT, CAM_to_POINT);
+		
+		
+		/*std::cout << "CAMERA POINT\n";
+		std::cout << "\t" << CAM_to_POINT[0] << "\n";
+		std::cout << "\t" << CAM_to_POINT[1] << "\n";
+		std::cout << "\t" << CAM_to_POINT[2] << "\n";*/
 		
 		T u, v;
 		cc_utils::project(
@@ -235,7 +214,7 @@ int main(int argc, char** argv) {
 			
 			std::string fname_common = fname_robot.substr(0, fname_robot.find_last_of("/\\"));
 			std::string fname_name = fname_robot.substr(fname_robot.find_last_of("/\\"));
-			std::string fname_image = fname_common + ReplaceString(fname_name, "robot", "rect");
+			std::string fname_image = fname_common + ReplaceString(fname_name, "robot", "virtual");
 
 			std::ifstream image_file(fname_image);
 			if(!image_file){
@@ -260,6 +239,7 @@ int main(int argc, char** argv) {
 			if(badpix){
 				continue;
 			}
+			//for(int i = 0; i < all_px.size();
 			
 			std::ifstream robot_file(fname_robot);
 			while(robot_file.getline(line, 255)){
@@ -313,8 +293,8 @@ int main(int argc, char** argv) {
 	
 	//Camera calibration is most useful externally as SYSREF_to_CAM,
 	//but for the math to work here we want CAM_to_SYSREF. So we will convert.
-	double CAM_to_SYSREF_t [3];
-	double CAM_to_SYSREF_r [3];
+	double CAM_to_SYSREF_t [3];// = {c_x, c_y, c_z};
+	double CAM_to_SYSREF_r [3];// = {cc_utils::rtod(c_r), cc_utils::rtod(c_p), cc_utils::rtod(c_w)};
 	
 	cc_utils::invert_eul(
 		c_x, c_y, c_z, 
@@ -327,9 +307,13 @@ int main(int argc, char** argv) {
 	CAM_to_SYSREF_r[1] = cc_utils::rtod(CAM_to_SYSREF_r[1]);
 	CAM_to_SYSREF_r[2] = cc_utils::rtod(CAM_to_SYSREF_r[2]);
 	
+	//Select only PART of the data, for debug
+	//pixel_locations.resize(11);
+	//target_locations.resize(11);
+	
 	
 	//Initialize visualization.
-	cc_utils::init_visualization(std::ceil(max_u) + 10, std::ceil(max_v) + 10, pixel_locations, options);
+	cc_utils::init_visualization(std::ceil(max_u) + 100, std::ceil(max_v) + 100, pixel_locations, options);
 
 	
 	//Pack the problem.
@@ -355,7 +339,8 @@ int main(int argc, char** argv) {
 	//Bound the rotations.
 	cc_utils::bound_rotation(problem, CAM_to_SYSREF_r);
 	//TODO What is this for?
-	//problem.SetParameterLowerBound(CAM_to_SYSREF_t, 2, 0.0);
+	//problem.SetParameterLowerBound(CAM_to_SYSREF_t, 1, -0.1);
+	//problem.SetParameterUpperBound(CAM_to_SYSREF_t, 1, 0.1);
 	
 	
 	//Run the solver!
@@ -368,6 +353,7 @@ int main(int argc, char** argv) {
     	
     	//Convert the camera-to-forearm transform back into forearm-to-camera for easy comparison
    	double c_x_out, c_y_out, c_z_out, c_r_out, c_p_out, c_w_out;
+   	
     	Eigen::Affine3d b = cc_utils::invert_eul(
 		CAM_to_SYSREF_t[0], CAM_to_SYSREF_t[1], CAM_to_SYSREF_t[2], 
 		cc_utils::dtor(CAM_to_SYSREF_r[0]), cc_utils::dtor(CAM_to_SYSREF_r[1]), cc_utils::dtor(CAM_to_SYSREF_r[2]), 
@@ -375,6 +361,15 @@ int main(int argc, char** argv) {
 		c_x_out, c_y_out, c_z_out,
 		c_r_out, c_p_out, c_w_out
 	);
+   	
+   	
+   	/*c_x_out = CAM_to_SYSREF_t[0];
+   	c_y_out = CAM_to_SYSREF_t[1];
+   	c_z_out = CAM_to_SYSREF_t[2];
+   	
+   	c_r_out = cc_utils::dtor(CAM_to_SYSREF_r[0]);
+   	c_p_out = cc_utils::dtor(CAM_to_SYSREF_r[1]);
+   	c_w_out = cc_utils::dtor(CAM_to_SYSREF_r[2]);*/
    	
    	//Output goodness-of-fit data
     	printf("\nCalibration complete.\n\n");

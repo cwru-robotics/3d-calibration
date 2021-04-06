@@ -6,12 +6,12 @@
 	/>
 	<arg
 		name="position_initial"
-		default="$(find cam_cal)/calibrations/stella_external_sim.yml"
+		default="$(find cam_cal)/calibrations/stella_lookdown.yml"
 		doc="Acquisition Description File which contains guesses at camera and target positions."
 	/>
 	<arg
 		name="intrinsics"
-		default="$(find cam_cal)/calibrations/stella_calibrated.yml"
+		default="$(find cam_cal)/calibrations/stella_rectified.yml"
 		doc="Calibration file which contains camera intrinsics."
 	/>
 	

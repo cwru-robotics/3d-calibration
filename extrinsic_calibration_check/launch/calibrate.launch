@@ -14,12 +14,16 @@
 		default="$(find cam_cal)/calibrations/stella_rectified.yml"
 		doc="Calibration file which contains camera intrinsics."
 	/>
+	<arg
+		name="output"
+		default="$(find roadprintz_launch)/launch/stella_camera_optical_frame"
+	/>
 	
 	<node
 		name="calibrator"
 		pkg="extrinsic_calibration_check"
 		type="ext_calibrator_check"
-		args="$(arg data) $(arg position_initial) $(arg intrinsics)"
+		args="$(arg data) $(arg position_initial) $(arg intrinsics) $(arg output)"
 		output="screen"
 		required="true"
 	/>

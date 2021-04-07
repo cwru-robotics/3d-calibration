@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <ctime>
 
 #include <boost/filesystem.hpp>
 
@@ -137,9 +138,9 @@ int main(int argc, char** argv) {
 	char * output;
 	if(argc < 5){
 		printf("\nNo designated output file given, calibrated data will be displayed and then discarded.\n");
-		output = argv[3];
-	} else {
 		output = NULL;
+	} else {
+		output = argv[4];
 	}
 	
 	
@@ -384,6 +385,92 @@ int main(int argc, char** argv) {
 	std::printf("\t%f\t%f\t%f\t%f\n", b.matrix()(1, 0), b.matrix()(1, 1), b.matrix()(1, 2), b.matrix()(1, 3));
 	std::printf("\t%f\t%f\t%f\t%f\n", b.matrix()(2, 0), b.matrix()(2, 1), b.matrix()(2, 2), b.matrix()(2, 3));
 	std::printf("\t%f\t%f\t%f\t%f\e[36m\n\n", b.matrix()(3, 0), b.matrix()(3, 1), b.matrix()(3, 2), b.matrix()(3, 3));
+	
+	if(output != NULL){
+		std::ifstream transform_file(image_folder_path.native()+"/forearm_position.csv");
+		if(!transform_file){
+			printf("\tAttempting to output data, but no %s\n", (image_folder_path.native()+"/forearm_position.csv").c_str());
+			return 0;
+		}
+		
+		char line[255];
+		if(!transform_file.getline(line, 255)){
+			printf("%s is blank!!", (image_folder_path.native()+"/forearm_position.csv").c_str());
+			return 0;
+		}
+			
+		std::string line_s = std::string(line);
+		if(std::count(line_s.begin(), line_s.end(), ',') != 15){
+			printf("\t\e[39mBad pixel file format. %s\e[31m\n", line);
+			return 0;
+		}
+		
+		double dform [16];
+		sscanf(line_s.c_str(), "%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf",
+			&dform[0 ], &dform[1 ], &dform[2 ], &dform[3 ],
+			&dform[4 ], &dform[5 ], &dform[6 ], &dform[7 ],
+			&dform[8 ], &dform[9 ], &dform[10], &dform[11],
+			&dform[12], &dform[13], &dform[14], &dform[15]
+		);
+		
+		Eigen::Affine3d FOREARM_to_SYSREF;
+		Eigen::Matrix4d m;
+		m <<
+			dform[0 ], dform[1 ], dform[2 ], dform[3 ],
+			dform[4 ], dform[5 ], dform[6 ], dform[7 ],
+			dform[8 ], dform[9 ], dform[10], dform[11],
+			dform[12], dform[13], dform[14], dform[15]
+		;
+		FOREARM_to_SYSREF.matrix() = m.inverse();
+		
+		Eigen::Affine3d FOREARM_to_CAMERA = FOREARM_to_SYSREF * b;
+		
+		
+		Eigen::Vector3d ea = FOREARM_to_CAMERA.rotation().eulerAngles(2, 1, 0);
+   	
+		double x_out = FOREARM_to_CAMERA.translation().x();
+		double y_out = FOREARM_to_CAMERA.translation().y();
+		double z_out = FOREARM_to_CAMERA.translation().z();
+		double r_out = ea.z();
+		double p_out = ea.y();
+		double w_out = ea.x();
+		
+		std::string lf_string = "<launch>\n\t<node\n\t\tpkg=\"tf\"\n\t\t";
+		lf_string += "type=\"static_transform_publisher\"\n\t\t";
+		lf_string += "name=\"camera_optical_frame_pub\"\n\t\targs=\"";
+		lf_string += std::to_string(x_out) + " " + std::to_string(y_out) + " " + std::to_string(z_out) + " ";
+		lf_string += std::to_string(r_out) + " " + std::to_string(p_out) + " " + std::to_string(w_out) + " ";
+		lf_string += "forearm camera_optical_frame 100\" \n\t/>\n</launch>";
+		
+		printf("Writing launch file \n\n%s\n\n", lf_string.c_str());
+		
+		std::ofstream master_file(std::string(output) + ".launch");
+		if(!master_file){
+			printf("Could not write to %s\n", (std::string(output) + ".launch").c_str());
+			master_file.close();
+		} else{
+			master_file << lf_string;
+			master_file.close();
+			printf("Wrote to %s\n", (std::string(output) + ".launch").c_str());
+		}
+		
+		time_t tsec = time(0);
+		tm* tword = localtime(&tsec);
+		
+		std::string t_string = std::string(output) + "_"
+			+std::to_string(tword->tm_mday)+"-"+std::to_string(tword->tm_mon+1)+"-"+std::to_string(tword->tm_year+1900)+"_"
+			+std::to_string(tword->tm_hour)+":"+std::to_string(tword->tm_min)+":"+std::to_string(tword->tm_sec)+".launch"
+		;
+		std::ofstream timed_file(t_string);
+		if(!timed_file){
+			printf("Could not write to %s\n", t_string.c_str());
+			timed_file.close();
+		} else{
+			timed_file << lf_string;
+			timed_file.close();
+			printf("Wrote to %s\n", t_string.c_str());
+		}
+	}
    	
 	return 0;
 }

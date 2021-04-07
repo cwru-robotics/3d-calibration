@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
 			
 			std::string fname_common = fname_robot.substr(0, fname_robot.find_last_of("/\\"));
 			std::string fname_name = fname_robot.substr(fname_robot.find_last_of("/\\"));
-			std::string fname_image = fname_common + ReplaceString(fname_name, "robot", "virtual");
+			std::string fname_image = fname_common + ReplaceString(fname_name, "robot", "rect");
 
 			std::ifstream image_file(fname_image);
 			if(!image_file){

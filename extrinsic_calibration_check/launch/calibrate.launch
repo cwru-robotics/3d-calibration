@@ -1,7 +1,7 @@
 <launch>
 	<arg
 		name="data"
-		default="$(find extrinsic_calibration_check)/data/"
+		default="$(env ROS_WORKSPACE)/calibration_temp_files/"
 		doc="CSV files of point data."
 	/>
 	<arg

@@ -387,7 +387,7 @@ int main(int argc, char** argv) {
 	std::printf("\t%f\t%f\t%f\t%f\e[36m\n\n", b.matrix()(3, 0), b.matrix()(3, 1), b.matrix()(3, 2), b.matrix()(3, 3));
 	
 	if(output != NULL){
-		std::ifstream transform_file(image_folder_path.native()+"/forearm_position.csv");
+		/*std::ifstream transform_file(image_folder_path.native()+"/forearm_position.csv");
 		if(!transform_file){
 			printf("\tAttempting to output data, but no %s\n", (image_folder_path.native()+"/forearm_position.csv").c_str());
 			return 0;
@@ -411,15 +411,15 @@ int main(int argc, char** argv) {
 			&dform[4 ], &dform[5 ], &dform[6 ], &dform[7 ],
 			&dform[8 ], &dform[9 ], &dform[10], &dform[11],
 			&dform[12], &dform[13], &dform[14], &dform[15]
-		);
+		);*/
 		
 		Eigen::Affine3d FOREARM_to_SYSREF;
 		Eigen::Matrix4d m;
-		m <<
-			dform[0 ], dform[1 ], dform[2 ], dform[3 ],
-			dform[4 ], dform[5 ], dform[6 ], dform[7 ],
-			dform[8 ], dform[9 ], dform[10], dform[11],
-			dform[12], dform[13], dform[14], dform[15]
+		m <<//SYSREF_to_FOREARM
+			0.9461516,	 0.0046041,	 0.3236913,	-2.521,
+			0.0032910,	-0.9999840,	 0.0046041,	-0.010,
+			0.3237073,	-0.0032910,	-0.9461516,	 1.951,
+			0,		 0,		 0,		 1
 		;
 		FOREARM_to_SYSREF.matrix() = m.inverse();
 		

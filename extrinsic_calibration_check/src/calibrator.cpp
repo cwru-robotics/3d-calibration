@@ -424,22 +424,18 @@ int main(int argc, char** argv) {
 		FOREARM_to_SYSREF.matrix() = m.inverse();
 		
 		Eigen::Affine3d FOREARM_to_CAMERA = FOREARM_to_SYSREF * b;
-		
-		
-		Eigen::Vector3d ea = FOREARM_to_CAMERA.rotation().eulerAngles(2, 1, 0);
    	
 		double x_out = FOREARM_to_CAMERA.translation().x();
 		double y_out = FOREARM_to_CAMERA.translation().y();
 		double z_out = FOREARM_to_CAMERA.translation().z();
-		double r_out = ea.z();
-		double p_out = ea.y();
-		double w_out = ea.x();
+		
+		Eigen::Quaterniond q = (Eigen::Quaterniond)FOREARM_to_CAMERA.rotation();
 		
 		std::string lf_string = "<launch>\n\t<node\n\t\tpkg=\"tf\"\n\t\t";
 		lf_string += "type=\"static_transform_publisher\"\n\t\t";
 		lf_string += "name=\"camera_optical_frame_pub\"\n\t\targs=\"";
 		lf_string += std::to_string(x_out) + " " + std::to_string(y_out) + " " + std::to_string(z_out) + " ";
-		lf_string += std::to_string(r_out) + " " + std::to_string(p_out) + " " + std::to_string(w_out) + " ";
+		lf_string += std::to_string(q.x()) + " " + std::to_string(q.y()) + " " + std::to_string(q.z()) + " " + std::to_string(q.w()) + " ";
 		lf_string += "RBIP_frame camera_optical_frame 100\" \n\t/>\n</launch>";
 		
 		printf("Writing launch file \n\n%s\n\n", lf_string.c_str());

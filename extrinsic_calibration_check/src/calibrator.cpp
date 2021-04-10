@@ -440,7 +440,7 @@ int main(int argc, char** argv) {
 		lf_string += "name=\"camera_optical_frame_pub\"\n\t\targs=\"";
 		lf_string += std::to_string(x_out) + " " + std::to_string(y_out) + " " + std::to_string(z_out) + " ";
 		lf_string += std::to_string(r_out) + " " + std::to_string(p_out) + " " + std::to_string(w_out) + " ";
-		lf_string += "forearm camera_optical_frame 100\" \n\t/>\n</launch>";
+		lf_string += "RBIP_frame camera_optical_frame 100\" \n\t/>\n</launch>";
 		
 		printf("Writing launch file \n\n%s\n\n", lf_string.c_str());
 		

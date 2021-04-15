@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(extrinsic_calibration_check)
+project(rbip_camera_extrinsics)
 
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)

@@ -21,7 +21,7 @@
 	
 	<node
 		name="calibrator"
-		pkg="extrinsic_calibration_check"
+		pkg="rbip_camera_extrinsics"
 		type="ext_calibrator_check"
 		args="$(arg data) $(arg position_initial) $(arg intrinsics) $(arg output)"
 		output="screen"

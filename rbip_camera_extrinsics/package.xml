@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-	<name>extrinsic_calibration_check</name>
+	<name>rbip_camera_extrinsics</name>
 	<version>1.0.0</version>
 	<description>Calibration solver for extrinsic camera position using checkerboard data.</description>
 	<maintainer email="tes77@case.edu">Tom Shkurti</maintainer>

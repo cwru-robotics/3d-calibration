@@ -74,7 +74,7 @@ public:
 	
 	
 	template<typename T> bool operator()(//TODO Why are all these const / should all these be const?
-		const T* CAM_to_SYSREF_translation, const T* CAM_to_SYSREF_rotation,
+		const T* CAM_to_RBIP_translation, const T* CAM_to_RBIP_rotation,
 		
 		T* residual
 	) const {
@@ -95,7 +95,7 @@ public:
 		
 		//1: BASE_to_POINT = BASE_to_TARGET * TARGET_to_POINT
 		T CAM_to_POINT [3];
-		cc_utils::transformPoint_euler(CAM_to_SYSREF_translation, CAM_to_SYSREF_rotation, TARGET_POINT, CAM_to_POINT);
+		cc_utils::transformPoint_euler(CAM_to_RBIP_translation, CAM_to_RBIP_rotation, TARGET_POINT, CAM_to_POINT);
 		
 		
 		/*std::cout << "CAMERA POINT\n";
@@ -274,7 +274,7 @@ int main(int argc, char** argv) {
 	int n = target_locations.size();
 	printf("\nIdentified %d points.\n", n);
 	
-	//Convert the target locations from sysref frame to forearm frame
+	//Convert the target locations from rbip frame to forearm frame
 	/*Eigen::Affine3d lidar_to_forearm;
 	lidar_to_forearm.matrix() <<
 		1, 0, 0, 0,
@@ -294,19 +294,19 @@ int main(int argc, char** argv) {
 	
 	//Camera calibration is most useful externally as SYSREF_to_CAM,
 	//but for the math to work here we want CAM_to_SYSREF. So we will convert.
-	double CAM_to_SYSREF_t [3];// = {c_x, c_y, c_z};
-	double CAM_to_SYSREF_r [3];// = {cc_utils::rtod(c_r), cc_utils::rtod(c_p), cc_utils::rtod(c_w)};
+	double CAM_to_RBIP_t [3];// = {c_x, c_y, c_z};
+	double CAM_to_RBIP_r [3];// = {cc_utils::rtod(c_r), cc_utils::rtod(c_p), cc_utils::rtod(c_w)};
 	
 	cc_utils::invert_eul(
 		c_x, c_y, c_z, 
 		c_r, c_p, c_w, 
 		
-		CAM_to_SYSREF_t[0], CAM_to_SYSREF_t[1], CAM_to_SYSREF_t[2],
-		CAM_to_SYSREF_r[0], CAM_to_SYSREF_r[1], CAM_to_SYSREF_r[2]
+		CAM_to_RBIP_t[0], CAM_to_RBIP_t[1], CAM_to_RBIP_t[2],
+		CAM_to_RBIP_r[0], CAM_to_RBIP_r[1], CAM_to_RBIP_r[2]
 	);
-	CAM_to_SYSREF_r[0] = cc_utils::rtod(CAM_to_SYSREF_r[0]);
-	CAM_to_SYSREF_r[1] = cc_utils::rtod(CAM_to_SYSREF_r[1]);
-	CAM_to_SYSREF_r[2] = cc_utils::rtod(CAM_to_SYSREF_r[2]);
+	CAM_to_RBIP_r[0] = cc_utils::rtod(CAM_to_RBIP_r[0]);
+	CAM_to_RBIP_r[1] = cc_utils::rtod(CAM_to_RBIP_r[1]);
+	CAM_to_RBIP_r[2] = cc_utils::rtod(CAM_to_RBIP_r[2]);
 	
 	//Select only PART of the data, for debug
 	//pixel_locations.resize(11);
@@ -332,13 +332,13 @@ int main(int argc, char** argv) {
 		
 		
 		problem.AddResidualBlock(cost_function, NULL,
-			CAM_to_SYSREF_t, CAM_to_SYSREF_r
+			CAM_to_RBIP_t, CAM_to_RBIP_r
 		);
 	}
 	
 	
 	//Bound the rotations.
-	cc_utils::bound_rotation(problem, CAM_to_SYSREF_r);
+	cc_utils::bound_rotation(problem, CAM_to_RBIP_r);
 	//TODO What is this for?
 	//problem.SetParameterLowerBound(CAM_to_SYSREF_t, 1, -0.1);
 	//problem.SetParameterUpperBound(CAM_to_SYSREF_t, 1, 0.1);
@@ -356,21 +356,12 @@ int main(int argc, char** argv) {
    	double c_x_out, c_y_out, c_z_out, c_r_out, c_p_out, c_w_out;
    	
     	Eigen::Affine3d b = cc_utils::invert_eul(
-		CAM_to_SYSREF_t[0], CAM_to_SYSREF_t[1], CAM_to_SYSREF_t[2], 
-		cc_utils::dtor(CAM_to_SYSREF_r[0]), cc_utils::dtor(CAM_to_SYSREF_r[1]), cc_utils::dtor(CAM_to_SYSREF_r[2]), 
+		CAM_to_RBIP_t[0], CAM_to_RBIP_t[1], CAM_to_RBIP_t[2], 
+		cc_utils::dtor(CAM_to_RBIP_r[0]), cc_utils::dtor(CAM_to_RBIP_r[1]), cc_utils::dtor(CAM_to_RBIP_r[2]), 
 		
 		c_x_out, c_y_out, c_z_out,
 		c_r_out, c_p_out, c_w_out
 	);
-   	
-   	
-   	/*c_x_out = CAM_to_SYSREF_t[0];
-   	c_y_out = CAM_to_SYSREF_t[1];
-   	c_z_out = CAM_to_SYSREF_t[2];
-   	
-   	c_r_out = cc_utils::dtor(CAM_to_SYSREF_r[0]);
-   	c_p_out = cc_utils::dtor(CAM_to_SYSREF_r[1]);
-   	c_w_out = cc_utils::dtor(CAM_to_SYSREF_r[2]);*/
    	
    	//Output goodness-of-fit data
     	printf("\nCalibration complete.\n\n");
@@ -378,7 +369,7 @@ int main(int argc, char** argv) {
     	printf("\e[36mRMS value is \e[35m%f px\e[36m.\n", cc_utils::rms());
     	
    	//Output calibration data.
-   	std::printf("\nSYSREF to CAMERA:\n");
+   	std::printf("\nRBIP to CAMERA:\n");
 	std::printf("\tx = \e[35m%f\e[36m\ty = \e[35m%f\e[36m\tz = \e[35m%f\e[36m\n", c_x_out, c_y_out, c_z_out);
 	std::printf("\tr = \e[35m%f\e[36m\tp = \e[35m%f\e[36m\tw = \e[35m%f\n\n", c_r_out, c_p_out, c_w_out);
 	std::printf("\t%f\t%f\t%f\t%f\n", b.matrix()(0, 0), b.matrix()(0, 1), b.matrix()(0, 2), b.matrix()(0, 3));
@@ -387,33 +378,9 @@ int main(int argc, char** argv) {
 	std::printf("\t%f\t%f\t%f\t%f\e[36m\n\n", b.matrix()(3, 0), b.matrix()(3, 1), b.matrix()(3, 2), b.matrix()(3, 3));
 	
 	if(output != NULL){
-		/*std::ifstream transform_file(image_folder_path.native()+"/forearm_position.csv");
-		if(!transform_file){
-			printf("\tAttempting to output data, but no %s\n", (image_folder_path.native()+"/forearm_position.csv").c_str());
-			return 0;
-		}
+
 		
-		char line[255];
-		if(!transform_file.getline(line, 255)){
-			printf("%s is blank!!", (image_folder_path.native()+"/forearm_position.csv").c_str());
-			return 0;
-		}
-			
-		std::string line_s = std::string(line);
-		if(std::count(line_s.begin(), line_s.end(), ',') != 15){
-			printf("\t\e[39mBad pixel file format. %s\e[31m\n", line);
-			return 0;
-		}
-		
-		double dform [16];
-		sscanf(line_s.c_str(), "%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf",
-			&dform[0 ], &dform[1 ], &dform[2 ], &dform[3 ],
-			&dform[4 ], &dform[5 ], &dform[6 ], &dform[7 ],
-			&dform[8 ], &dform[9 ], &dform[10], &dform[11],
-			&dform[12], &dform[13], &dform[14], &dform[15]
-		);*/
-		
-		Eigen::Affine3d FOREARM_to_SYSREF;
+		/*Eigen::Affine3d FOREARM_to_SYSREF;
 		Eigen::Matrix4d m;
 		m <<//SYSREF_to_FOREARM
 			 0.9997041,  0.0040474,  0.0239884,	 0,
@@ -423,13 +390,13 @@ int main(int argc, char** argv) {
 		;
 		FOREARM_to_SYSREF.matrix() = m.inverse();
 		
-		Eigen::Affine3d FOREARM_to_CAMERA = FOREARM_to_SYSREF * b;
+		Eigen::Affine3d FOREARM_to_CAMERA = FOREARM_to_SYSREF * b;*/
    	
-		double x_out = FOREARM_to_CAMERA.translation().x();
-		double y_out = FOREARM_to_CAMERA.translation().y();
-		double z_out = FOREARM_to_CAMERA.translation().z();
+		double x_out = b.translation().x();
+		double y_out = b.translation().y();
+		double z_out = b.translation().z();
 		
-		Eigen::Quaterniond q = (Eigen::Quaterniond)FOREARM_to_CAMERA.rotation();
+		Eigen::Quaterniond q = (Eigen::Quaterniond)b.rotation();
 		
 		std::string lf_string = "<launch>\n\t<node\n\t\tpkg=\"tf\"\n\t\t";
 		lf_string += "type=\"static_transform_publisher\"\n\t\t";

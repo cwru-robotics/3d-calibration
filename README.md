@@ -25,3 +25,7 @@ Identification of fixed camera position w.r.t. RBIP frame, using large checkerbo
 # toolflange
 
 Centering of camera on tool flange by spinning over a single checkerboard intersection. Currently not in use.
+
+# sprayhead
+
+Vertical detection of sprayhead calibration paint.

@@ -60,9 +60,9 @@ bool srv_CB(
 	
 	cv::Mat ow;
 	cv::Canny(windowed, ow, 50, 200, 3);
-	/*cv::imshow("Edges", ow);
+	cv::imshow("Edges", ow);
 	cv::waitKey();
-	cv::destroyAllWindows();*/
+	cv::destroyAllWindows();
 	
 	std::vector<cv::Vec2f> lines;
 	HoughLines(ow, lines, 0.5, CV_PI/90.0, 60, 0, 0, 0, CV_PI);
@@ -204,10 +204,10 @@ bool srv_CB(
 
 int main(int argc, char ** argv){
 	//ROS initialization
-	ros::init(argc, argv, "sprayhead_calibrator");
+	ros::init(argc, argv, "sprayhead_calibrator_h");
 	ros::NodeHandle nh;
 	
-	ros::ServiceServer cl = nh.advertiseService("/analyze_sprayhead_image", srv_CB);
+	ros::ServiceServer cl = nh.advertiseService("/analyze_sprayhead_image_horizontal", srv_CB);
 	
 	ros::spin();
 

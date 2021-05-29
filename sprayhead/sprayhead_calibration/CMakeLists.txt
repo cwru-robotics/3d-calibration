@@ -22,6 +22,10 @@ catkin_package(
 	CATKIN_DEPENDS message_runtime
 )
 
-add_executable(sprayhead_cal_srv src/detector.cpp)
-target_link_libraries(sprayhead_cal_srv ${OpenCV_LIBS} ${catkin_LIBRARIES})
-add_dependencies(sprayhead_cal_srv ${${PROJECT_NAME}_EXPORTED_TARGETS})
+add_executable(sprayhead_hor_cal_srv src/detector_h.cpp)
+target_link_libraries(sprayhead_hor_cal_srv ${OpenCV_LIBS} ${catkin_LIBRARIES})
+add_dependencies(sprayhead_hor_cal_srv ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
+add_executable(sprayhead_ver_cal_srv src/detector_v.cpp)
+target_link_libraries(sprayhead_ver_cal_srv ${OpenCV_LIBS} ${catkin_LIBRARIES})
+add_dependencies(sprayhead_ver_cal_srv ${${PROJECT_NAME}_EXPORTED_TARGETS})

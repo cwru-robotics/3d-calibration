@@ -38,7 +38,7 @@ bool srv_CB(
 	cv::destroyAllWindows();
 	
 	cv::SimpleBlobDetector::Params blob_params;
-	blob_params.minDistBetweenBlobs = 1;//Investigate this property
+	blob_params.minDistBetweenBlobs = 20;//Investigate this property
 	blob_params.filterByColor = true;
 	blob_params.blobColor = 255;
 	
@@ -49,17 +49,6 @@ bool srv_CB(
 	
 	cv::Ptr<cv::SimpleBlobDetector> bd = cv::SimpleBlobDetector::create(blob_params);
 	
-	std::vector<cv::KeyPoint> blob_centers;
-	bd->detect(yellowthresh, blob_centers);
-	
-	if(blob_centers.size() != 6){
-		ROS_ERROR(
-			"Detected %ld yellow objects when there should be 6.\n",
-			blob_centers.size()
-		);
-		response.success = false;
-		return true;
-	}
 	
 	int sizemeasure = std::max(
 		std::max(original_image.rows, original_image.cols) / 100,
@@ -70,6 +59,24 @@ bool srv_CB(
 		cv::Size(sizemeasure, sizemeasure),
 		cv::Point(sizemeasure / 2, sizemeasure / 2)
 	);
+	
+	cv::Mat yt_eroded;
+	cv::erode(yellowthresh, yt_eroded, de);
+	cv::imshow("Thresholded Eroded Yellowness", yt_eroded);
+	cv::waitKey();
+	cv::destroyAllWindows();
+	
+	std::vector<cv::KeyPoint> blob_centers;
+	bd->detect(yt_eroded, blob_centers);
+	
+	if(blob_centers.size() != 6){
+		ROS_ERROR(
+			"Detected %ld yellow objects when there should be 6.\n",
+			blob_centers.size()
+		);
+		response.success = false;
+		return true;
+	}
 	
 	std::vector<double> final_lines;
 	

@@ -27,13 +27,65 @@ bool srv_CB(
 	cv::waitKey();
 	cv::destroyAllWindows();*/
 	
-	cv::Mat yellowness = (hsv[1].mul(hsv[2])) / 255.0;
-	/*cv::imshow("Crude Yellowness", yellowness);
+	//For blue squares. This may vary.
+	cv::Mat hue_diff = cv::abs(hsv[0]);//Blue appears to be hue 0 in their color system
+	cv::Mat sat_diff = cv::abs(hsv[1] - 129);
+	cv::Mat val_diff = cv::abs(hsv[2] - 229);
+	/*cv::imshow("Hue Diff", hue_diff);
+	cv::imshow("Sat Diff", sat_diff);
+	cv::imshow("Lum Diff", val_diff);
 	cv::waitKey();
 	cv::destroyAllWindows();*/
 	
-	cv::Mat yellowthresh = yellowness > 100.0;
+	cv::Mat hue_diff_d;
+	cv::Mat sat_diff_d;
+	cv::Mat val_diff_d;
+	
+	hue_diff.convertTo(hue_diff_d, CV_64FC1);
+	sat_diff.convertTo(sat_diff_d, CV_64FC1);
+	val_diff.convertTo(val_diff_d, CV_64FC1);
+	
+	cv::Mat blueness;
+	cv::sqrt(
+		hue_diff_d.mul(hue_diff_d) +
+		sat_diff_d.mul(sat_diff_d) +
+		val_diff_d.mul(val_diff_d)
+	, blueness);
+	blueness = blueness / 255.0;
+	cv::imshow("Crude Blueness", blueness);
+	cv::waitKey();
+	cv::destroyAllWindows();
+	
+	cv::Mat yellowthresh_fl = (blueness < 0.25) * 255;
+	cv::Mat yellowthresh;
+	yellowthresh_fl.convertTo(yellowthresh, CV_8UC1);
 	cv::imshow("Thresholded Yellowness", yellowthresh);
+	cv::waitKey();
+	cv::destroyAllWindows();
+	
+	int sizemeasure = std::max(
+		std::max(original_image.rows, original_image.cols) / 50,
+		2
+	);
+	cv::Mat de = cv::getStructuringElement(
+		cv::MORPH_ELLIPSE,
+		cv::Size(sizemeasure, sizemeasure),
+		cv::Point(sizemeasure / 2, sizemeasure / 2)
+	);
+	cv::Mat dilated_thresh;
+	cv::dilate(yellowthresh, dilated_thresh, de);
+	/*cv::imshow("Thresholded Expanded Yellowness", dilated_thresh);
+	cv::waitKey();
+	cv::destroyAllWindows();*/
+	
+	
+	cv::Mat windowed;
+	cv::Mat blueness_uc;
+	blueness = 255 - (blueness * 255.0);
+	blueness = blueness - 128;
+	blueness.convertTo(blueness_uc, CV_8UC1);
+	blueness_uc.copyTo(windowed, dilated_thresh);
+	cv::imshow("Thresholded Masked Yellowness", windowed);
 	cv::waitKey();
 	cv::destroyAllWindows();
 	

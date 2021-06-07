@@ -69,7 +69,7 @@ bool srv_CB(
 	std::vector<cv::KeyPoint> blob_centers;
 	bd->detect(yt_eroded, blob_centers);
 	
-	if(blob_centers.size() != 6){
+	if(blob_centers.size() != 8){
 		ROS_ERROR(
 			"Detected %ld yellow objects when there should be 6.\n",
 			blob_centers.size()
@@ -80,10 +80,10 @@ bool srv_CB(
 	
 	std::vector<double> final_lines;
 	
-	for(int n = 0; n < 6; n++){
+	for(int n = 0; n < 8; n++){
 		cv::Mat yellowthresh_clone;
 		yellowthresh.copyTo(yellowthresh_clone);
-		for(int i = 0; i < 6; i++){
+		for(int i = 0; i < 8; i++){
 			if(i != n){
 				cv::floodFill(yellowthresh_clone, blob_centers[i].pt, cv::Scalar(0));
 			}

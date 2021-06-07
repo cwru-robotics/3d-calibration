@@ -32,9 +32,9 @@ bool srv_CB(
 	cv::destroyAllWindows();*/
 	
 	cv::Mat yellowthresh = yellowness > 100.0;
-	/*cv::imshow("Thresholded Yellowness", yellowthresh);
+	cv::imshow("Thresholded Yellowness", yellowthresh);
 	cv::waitKey();
-	cv::destroyAllWindows();*/
+	cv::destroyAllWindows();
 	
 	int sizemeasure = std::max(
 		std::max(original_image.rows, original_image.cols) / 50,
@@ -144,7 +144,7 @@ bool srv_CB(
 		}	
 			
 		threshold += 0.1;
-	} while(decimated_lines.size() != 12);
+	} while(decimated_lines.size() != 16);
 	// Draw the condensed lines
 	cv::Mat con = original_image.clone();
 	for(int i = 0; i < decimated_lines.size(); i++ ){

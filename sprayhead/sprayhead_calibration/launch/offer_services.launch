@@ -1,0 +1,22 @@
+<launch>
+	<arg
+		name="path"
+		default="$(find sprayhead_calibration)/centers.csv"
+		doc="Path to look for centers file that assists in detection."
+	/>
+	
+	<node
+		name="hosizontal"
+		pkg="sprayhead_calibration"
+		type="sprayhead_hor_cal_srv"
+		args="$(arg path)"
+		output="screen"
+	/>
+	<node
+		name="vertical"
+		pkg="sprayhead_calibration"
+		type="sprayhead_ver_cal_srv"
+		args="$(arg path)"
+		output="screen"
+	/>
+</launch>

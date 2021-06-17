@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include <ros/ros.h>
 #include <cv_bridge/cv_bridge.h>
 
@@ -5,6 +7,8 @@
 #include <opencv2/features2d.hpp>
 
 #include <sprayhead_calibration/Sprayhead_Calibrate.h>
+
+std::vector<cv::Point2f> points;
 
 bool srv_CB(
 	sprayhead_calibration::Sprayhead_CalibrateRequest & request,
@@ -27,31 +31,8 @@ bool srv_CB(
 	cv::waitKey();
 	cv::destroyAllWindows();*/
 	
-	cv::Mat yellowness = (hsv[1].mul(hsv[2])) / 255.0;
-	/*cv::imshow("Crude Yellowness", yellowness);
-	cv::waitKey();
-	cv::destroyAllWindows();*/
-	
-	cv::Mat yellowthresh = yellowness > 100.0;
-	cv::imshow("Thresholded Yellowness", yellowthresh);
-	cv::waitKey();
-	cv::destroyAllWindows();
-	
-	cv::SimpleBlobDetector::Params blob_params;
-	blob_params.minDistBetweenBlobs = 20;//Investigate this property
-	blob_params.filterByColor = true;
-	blob_params.blobColor = 255;
-	
-	blob_params.filterByArea = false;
-	blob_params.filterByCircularity = false;
-	blob_params.filterByConvexity = false;
-	blob_params.filterByInertia = false;
-	
-	cv::Ptr<cv::SimpleBlobDetector> bd = cv::SimpleBlobDetector::create(blob_params);
-	
-	
 	int sizemeasure = std::max(
-		std::max(original_image.rows, original_image.cols) / 100,
+		std::max(original_image.rows, original_image.cols) / 250,
 		2
 	);
 	cv::Mat de = cv::getStructuringElement(
@@ -60,49 +41,78 @@ bool srv_CB(
 		cv::Point(sizemeasure / 2, sizemeasure / 2)
 	);
 	
-	cv::Mat yt_eroded;
-	cv::erode(yellowthresh, yt_eroded, de);
-	cv::imshow("Thresholded Eroded Yellowness", yt_eroded);
-	cv::waitKey();
-	cv::destroyAllWindows();
-	
-	std::vector<cv::KeyPoint> blob_centers;
-	bd->detect(yt_eroded, blob_centers);
-	
-	if(blob_centers.size() != 6){
-		ROS_ERROR(
-			"Detected %ld yellow objects when there should be 6.\n",
-			blob_centers.size()
-		);
-		response.success = false;
-		return true;
-	}
-	
 	std::vector<double> final_lines;
-	
-	for(int n = 0; n < 6; n++){
-		cv::Mat yellowthresh_clone;
-		yellowthresh.copyTo(yellowthresh_clone);
-		for(int i = 0; i < 6; i++){
-			if(i != n){
-				cv::floodFill(yellowthresh_clone, blob_centers[i].pt, cv::Scalar(0));
-			}
-		}
-		/*cv::imshow("Excluded_Blob", yellowthresh_clone);
+	for(int n = 0; n < points.size() && ros::ok(); n++){
+		uchar hue_core = hsv[0].at<uchar>(points[n]);
+		uchar sat_core = hsv[1].at<uchar>(points[n]);
+		uchar val_core = hsv[2].at<uchar>(points[n]);
+		//ROS_INFO("%d %d %d\n", hue_core, sat_core, val_core);
+		
+		cv::Mat hue_diff = cv::abs(hsv[0] - hue_core);
+		cv::Mat sat_diff = cv::abs(hsv[1] - sat_core);
+		cv::Mat val_diff = cv::abs(hsv[2] - val_core);
+		/*cv::imshow("Hue Diff", hue_diff);
+		cv::imshow("Sat Diff", sat_diff);
+		cv::imshow("Lum Diff", val_diff);
 		cv::waitKey();
 		cv::destroyAllWindows();*/
 		
-		cv::Mat dilated_thresh;
-		cv::dilate(yellowthresh_clone, dilated_thresh, de);
-		/*cv::imshow("Thresholded Expanded Yellowness", dilated_thresh);
+		//Numerical ops like sqrt don't work on uchar (!).
+		cv::Mat hue_diff_d;
+		cv::Mat sat_diff_d;
+		cv::Mat val_diff_d;
+	
+		hue_diff.convertTo(hue_diff_d, CV_64FC1);
+		sat_diff.convertTo(sat_diff_d, CV_64FC1);
+		val_diff.convertTo(val_diff_d, CV_64FC1);
+		
+		cv::Mat fitness;
+		cv::sqrt(//No easy ^2 function
+			//hue_diff_d.mul(hue_diff_d) +//Selecting white things by hue generally produces unusable results.
+			sat_diff_d.mul(sat_diff_d) +
+			val_diff_d.mul(val_diff_d)
+		, fitness);
+		
+		uchar avg_fitness = cv::mean(fitness)[0];
+		fitness = fitness / 255.0;
+		/*Icv::imshow("Crude Fitness", fitness);
+		cv::waitKey();
+		cv::destroyAllWindows();*/
+		
+		cv::Mat fitthresh_fl = (fitness < 0.25) * 255;
+		cv::Mat fitthresh;
+		fitthresh_fl.convertTo(fitthresh, CV_8UC1);
+		/*cv::imshow("Thresholded Fitness", fitthresh);
+		cv::waitKey();
+		cv::destroyAllWindows();*/
+		
+		//Fill in an intermediate value since there are already a lot of 255s in an otherwise black image.
+		cv::floodFill(fitthresh, points[n], cv::Scalar(128));
+		cv::Mat fitthresh_windowed = (fitthresh == 128);
+		/*cv::imshow("Single Point Window", fitthresh_windowed);
+		cv::waitKey();
+		cv::destroyAllWindows();*/
+		
+		cv::Mat dilated;
+		cv::dilate(fitthresh_windowed, dilated, de);
+		/*cv::imshow("Thresholded Expanded Fitness", dilated);
+		cv::waitKey();
+		cv::destroyAllWindows();*/
+		
+		fitness = fitness * 255.0;
+		cv::Mat fitness_flipped;
+		fitness.convertTo(fitness_flipped, CV_8UC1);
+		fitness_flipped = (255-fitness_flipped) - (avg_fitness - 50);//Subtraction of average prevents the background from making a line where it is windowed.
+		/*cv::imshow("Recalculated Fitness", fitness_flipped);
 		cv::waitKey();
 		cv::destroyAllWindows();*/
 		
 		cv::Mat windowed;
-		yellowness.copyTo(windowed, dilated_thresh);
-		/*cv::imshow("Thresholded Masked Yellowness", windowed);
+		fitness_flipped.copyTo(windowed, dilated);
+		/*cv::imshow("Window of Examination", windowed);
 		cv::waitKey();
 		cv::destroyAllWindows();*/
+		
 		
 		cv::Mat ow;
 		cv::Canny(windowed, ow, 50, 200, 3);
@@ -111,7 +121,7 @@ bool srv_CB(
 		cv::destroyAllWindows();*/
 		
 		std::vector<cv::Vec2f> lines;
-		HoughLines(ow, lines, 0.5, CV_PI/90.0, 10, 0, 0, 0, CV_PI);
+		HoughLines(ow, lines, 0.5, CV_PI/90.0, 15, 0, 0, 0, CV_PI);
 		// Draw all the lines
 		/*cv::Mat all = original_image.clone();
 		for(int i = 0; i < lines.size(); i++ ){
@@ -143,6 +153,7 @@ bool srv_CB(
 		cv::Mat ver = original_image.clone();
 		for(int i = 0; i < filtered_lines.size(); i++ ){
         		float rho = filtered_lines[i][0];
+			printf("%f\n", rho);
 			float theta = filtered_lines[i][1];
         		cv::Point pt1, pt2;
         		double a = cos(theta);
@@ -158,7 +169,8 @@ bool srv_CB(
 		}
 		cv::imshow("Vertical Lines", ver);
 		cv::waitKey();
-		cv::destroyAllWindows();*/
+		cv::destroyAllWindows();
+		printf("\n\n");*/
 		
 		std::vector<cv::Vec2f> decimated_lines;
 		double threshold = 0.1;
@@ -178,8 +190,8 @@ bool srv_CB(
 					}
 				}
 				if(new_anchor){
-					accumulation_vector.push_back(cv::Vec2f(0, 0));
-					size_vector.push_back(0);
+					accumulation_vector.push_back(filtered_lines[i]);
+					size_vector.push_back(1);
 					anchor_vector.push_back(filtered_lines[i]);
 				}
 			}
@@ -190,12 +202,14 @@ bool srv_CB(
 			}	
 				
 			threshold += 0.1;
-		} while(decimated_lines.size() != 2);
-		// Draw the condensed lines
+		} while(decimated_lines.size() > 2);
+		
+		/*// Draw the condensed lines
 		cv::Mat con = original_image.clone();
 		for(int i = 0; i < decimated_lines.size(); i++ ){
 	        	float rho = decimated_lines[i][0];
 			float theta = decimated_lines[i][1];
+			printf("%f\n", rho);
 	        	cv::Point pt1, pt2;
 	        	double a = cos(theta);
 	        	double b = sin(theta);
@@ -210,7 +224,7 @@ bool srv_CB(
 		}
 		cv::imshow("Condensed Lines", con);
 		cv::waitKey();
-		cv::destroyAllWindows();
+		cv::destroyAllWindows();*/
 		
 		if(decimated_lines[0][0] < decimated_lines[1][0]){
 			final_lines.push_back(decimated_lines[0][0]);
@@ -218,7 +232,7 @@ bool srv_CB(
 		} else{
 			final_lines.push_back(decimated_lines[1][0]);
 			final_lines.push_back(decimated_lines[0][0]);
-		}	
+		}
 	}
 	
 	printf("Changes in line distance:\n");
@@ -226,8 +240,8 @@ bool srv_CB(
 		printf("\t%f px\n", request.guesses[i] - final_lines[i]);
 		response.detections[i] = final_lines[i];
 	}
-	
 	response.success = true;
+	
 	return true;
 }
 
@@ -235,6 +249,41 @@ int main(int argc, char ** argv){
 	//ROS initialization
 	ros::init(argc, argv, "sprayhead_calibrator");
 	ros::NodeHandle nh;
+	
+	if(argc < 2){
+		ROS_ERROR("Node needs a seed-values file to run, and one was not provided. Terminating.\n");
+		return 0;
+	}
+	
+	std::ifstream data_file;
+	data_file.open(argv[1]);
+	if(!data_file){
+		printf("\e[39mCould not find data file \"%s\".\e[31m\n", argv[1]);
+		return 0;
+	}
+	
+	int n = 0;
+	char line [128];
+	while(data_file.getline(line, 128)){
+		n++;
+		std::string line_s = std::string(line);
+		if(std::count(line_s.begin(), line_s.end(), ',') != 1){
+			ROS_ERROR("Bad file format. Line %d (%s).\n", n, line);
+			return 0;
+		}
+		
+		cv::Point2d px;
+		sscanf(line, "%lf, %lf",
+			&px.x, &px.y
+		);
+		
+		points.push_back(px);
+	}
+	ROS_INFO("Read in \e[1m%d\e[0m entries from %s.\n\n", n, argv[1]);
+	if(n != 8){
+		ROS_ERROR("There should be 8, terminating.\n");
+		return 0;
+	}	
 	
 	ros::ServiceServer cl = nh.advertiseService("/analyze_sprayhead_image_vertical", srv_CB);
 	

@@ -1,5 +1,5 @@
 string image_file
-float64[12] guesses #Should be TOP TO BOTTOM
+float64[16] guesses #Should be TOP TO BOTTOM
 ---
 bool success #If the detection worked
-float64[12] detections #The detections, TOP TO BOTTOM
+float64[16] detections #The detections, TOP TO BOTTOM

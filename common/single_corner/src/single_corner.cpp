@@ -23,6 +23,25 @@ cv::Mat dst, cdst, cdstP;
 	//Hough transform
 	std::vector<cv::Vec2f> lines;
 	HoughLines(ow, lines, 1, CV_PI/180, 150, 0, 0 );
+	
+	
+	//Eliminate all lines too close to the edges of the image.
+	int w = img.cols;
+	int h = img.rows;
+	std::vector<cv::Vec2f> lines_tmp;
+	for(int i = 0; i < lines.size(); i++){
+		float rho = lines[i][0];
+		if(rho < w / 4 || rho > 3 * (w / 4)){
+			continue;
+		}
+		if(rho < h / 4 || rho > 3 * (h / 4)){
+			continue;
+		}
+		lines_tmp.push_back(lines[i]);
+	}
+	lines = std::vector<cv::Vec2f>(lines_tmp);
+		
+	
 
 	// Draw all the lines
 	cv::Mat all = img.clone();

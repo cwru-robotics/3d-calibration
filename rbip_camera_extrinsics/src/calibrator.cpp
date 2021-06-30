@@ -74,15 +74,15 @@ public:
 	
 	
 	template<typename T> bool operator()(//TODO Why are all these const / should all these be const?
-		const T* CAM_to_RBIP_translation, const T* CAM_to_RBIP_rotation,
+		const T* CAM_to_SYSREF_translation, const T* CAM_to_SYSREF_rotation,
 		
 		T* residual
 	) const {
-		//CAM_to_POINT = CAM_to_FOREARM TARGET_POINT
+		//CAM_to_POINT = CAM_to_SYSREF * SYSREF_to_POINT
 		
 		
-		//0: TARGET_to_POINT
-		T TARGET_POINT [3] = {
+		//0: SYSREF_to_POINT
+		T SYSREF_to_POINT [3] = {
 			T(target_point[0]),
 			T(target_point[1]),
 			T(target_point[2]),
@@ -93,9 +93,9 @@ public:
 		std::cout << "\t" << TARGET_POINT[1] << "\n";
 		std::cout << "\t" << TARGET_POINT[2] << "\n";*/
 		
-		//1: BASE_to_POINT = BASE_to_TARGET * TARGET_to_POINT
+		//1: CAM_to_POINT = CAM_to_SYSREF * SYSREF_to_POINT
 		T CAM_to_POINT [3];
-		cc_utils::transformPoint_euler(CAM_to_RBIP_translation, CAM_to_RBIP_rotation, TARGET_POINT, CAM_to_POINT);
+		cc_utils::transformPoint_euler(CAM_to_SYSREF_translation, CAM_to_SYSREF_rotation, SYSREF_to_POINT, CAM_to_POINT);
 		
 		
 		/*std::cout << "CAMERA POINT\n";
@@ -294,19 +294,19 @@ int main(int argc, char** argv) {
 	
 	//Camera calibration is most useful externally as SYSREF_to_CAM,
 	//but for the math to work here we want CAM_to_SYSREF. So we will convert.
-	double CAM_to_RBIP_t [3];// = {c_x, c_y, c_z};
-	double CAM_to_RBIP_r [3];// = {cc_utils::rtod(c_r), cc_utils::rtod(c_p), cc_utils::rtod(c_w)};
+	double CAM_to_SYSREF_t [3];// = {c_x, c_y, c_z};
+	double CAM_to_SYSREF_r [3];// = {cc_utils::rtod(c_r), cc_utils::rtod(c_p), cc_utils::rtod(c_w)};
 	
 	cc_utils::invert_eul(
 		c_x, c_y, c_z, 
 		c_r, c_p, c_w, 
 		
-		CAM_to_RBIP_t[0], CAM_to_RBIP_t[1], CAM_to_RBIP_t[2],
-		CAM_to_RBIP_r[0], CAM_to_RBIP_r[1], CAM_to_RBIP_r[2]
+		CAM_to_SYSREF_t[0], CAM_to_SYSREF_t[1], CAM_to_SYSREF_t[2],
+		CAM_to_SYSREF_r[0], CAM_to_SYSREF_r[1], CAM_to_SYSREF_r[2]
 	);
-	CAM_to_RBIP_r[0] = cc_utils::rtod(CAM_to_RBIP_r[0]);
-	CAM_to_RBIP_r[1] = cc_utils::rtod(CAM_to_RBIP_r[1]);
-	CAM_to_RBIP_r[2] = cc_utils::rtod(CAM_to_RBIP_r[2]);
+	CAM_to_SYSREF_r[0] = cc_utils::rtod(CAM_to_SYSREF_r[0]);
+	CAM_to_SYSREF_r[1] = cc_utils::rtod(CAM_to_SYSREF_r[1]);
+	CAM_to_SYSREF_r[2] = cc_utils::rtod(CAM_to_SYSREF_r[2]);
 	
 	//Select only PART of the data, for debug
 	//pixel_locations.resize(11);
@@ -332,13 +332,13 @@ int main(int argc, char** argv) {
 		
 		
 		problem.AddResidualBlock(cost_function, NULL,
-			CAM_to_RBIP_t, CAM_to_RBIP_r
+			CAM_to_SYSREF_t, CAM_to_SYSREF_r
 		);
 	}
 	
 	
 	//Bound the rotations.
-	cc_utils::bound_rotation(problem, CAM_to_RBIP_r);
+	cc_utils::bound_rotation(problem, CAM_to_SYSREF_r);
 	//TODO What is this for?
 	//problem.SetParameterLowerBound(CAM_to_SYSREF_t, 1, -0.1);
 	//problem.SetParameterUpperBound(CAM_to_SYSREF_t, 1, 0.1);
@@ -352,12 +352,12 @@ int main(int argc, char** argv) {
     	ceres::Solve(options, &problem, &summary);
     	
     	
-    	//Convert the camera-to-forearm transform back into forearm-to-camera for easy comparison
+    	//Convert the camera-to-sysref transform back into sysref-to-camera for easy comparison
    	double c_x_out, c_y_out, c_z_out, c_r_out, c_p_out, c_w_out;
    	
     	Eigen::Affine3d b = cc_utils::invert_eul(
-		CAM_to_RBIP_t[0], CAM_to_RBIP_t[1], CAM_to_RBIP_t[2], 
-		cc_utils::dtor(CAM_to_RBIP_r[0]), cc_utils::dtor(CAM_to_RBIP_r[1]), cc_utils::dtor(CAM_to_RBIP_r[2]), 
+		CAM_to_SYSREF_t[0], CAM_to_SYSREF_t[1], CAM_to_SYSREF_t[2], 
+		cc_utils::dtor(CAM_to_SYSREF_r[0]), cc_utils::dtor(CAM_to_SYSREF_r[1]), cc_utils::dtor(CAM_to_SYSREF_r[2]), 
 		
 		c_x_out, c_y_out, c_z_out,
 		c_r_out, c_p_out, c_w_out
@@ -369,7 +369,7 @@ int main(int argc, char** argv) {
     	printf("\e[36mRMS value is \e[35m%f px\e[36m.\n", cc_utils::rms());
     	
    	//Output calibration data.
-   	std::printf("\nRBIP to CAMERA:\n");
+   	std::printf("\nSYSREF to CAMERA:\n");
 	std::printf("\tx = \e[35m%f\e[36m\ty = \e[35m%f\e[36m\tz = \e[35m%f\e[36m\n", c_x_out, c_y_out, c_z_out);
 	std::printf("\tr = \e[35m%f\e[36m\tp = \e[35m%f\e[36m\tw = \e[35m%f\n\n", c_r_out, c_p_out, c_w_out);
 	std::printf("\t%f\t%f\t%f\t%f\n", b.matrix()(0, 0), b.matrix()(0, 1), b.matrix()(0, 2), b.matrix()(0, 3));

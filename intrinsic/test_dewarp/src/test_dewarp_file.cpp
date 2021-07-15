@@ -10,7 +10,7 @@ int main(int argc, char ** argv){
 		return 0;
 	}
 	
-	cv::Mat img = cv::imread(argv[2], CV_LOAD_IMAGE_COLOR);
+	cv::Mat img = cv::imread(argv[2], cv::IMREAD_COLOR);
 	if(! img.data ){// Check for invalid input
 		printf("\e[31mCould not process image %s.\e[39m\n", argv[2]);
 		return 0;

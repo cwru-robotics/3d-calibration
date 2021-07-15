@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
 	){
 		if(x.path().native().find("img") != std::string::npos){
 			vec_of_image_names.push_back(x.path().native());
-			cv::Mat im = cv::imread(x.path().native(), CV_LOAD_IMAGE_COLOR);
+			cv::Mat im = cv::imread(x.path().native(), cv::IMREAD_COLOR);
 			vec_of_images.push_back(im);
 		}
 	}
@@ -159,7 +159,7 @@ int main(int argc, char** argv) {
 		cv::Mat grayscaleImage;
 		
 		image = vec_of_images[i_image];
-		cv::cvtColor(image, grayscaleImage, CV_BGR2GRAY);
+		cv::cvtColor(image, grayscaleImage, cv::COLOR_BGR2GRAY);
 		bool patternfound;
 		if(circles){
 			patternfound = findCirclesGrid(grayscaleImage, patternsize, centers, 1, circle_detector_ptr_);

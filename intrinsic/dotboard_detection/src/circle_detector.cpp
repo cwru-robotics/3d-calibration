@@ -249,7 +249,7 @@ namespace cv {
         int n_points, circleColor;
         vector<vector<Point> > contours;
         Mat tmpBinaryImage = binaryImage.clone();
-        findContours(tmpBinaryImage, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+        findContours(tmpBinaryImage, contours, cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
         int n_contours = contours.size();
         // vector<vector<Point> > contours0;
         //     for( size_t k = 0; k < contours0.size(); k++ ) 
@@ -519,7 +519,7 @@ namespace cv {
         keypoints.clear();
         Mat grayscaleImage;
         if (image.channels() == 3)
-            cvtColor(image, grayscaleImage, CV_BGR2GRAY);
+            cvtColor(image, grayscaleImage, cv::COLOR_BGR2GRAY);
         else
             grayscaleImage = image;
 
@@ -588,7 +588,7 @@ namespace cv {
         }
 
 #ifdef DEBUG_CIRCLE_DETECTOR
-        //namedWindow("keypoints", CV_WINDOW_NORMAL);
+        //namedWindow("keypoints", cv::WINDOW_NORMAL);
         Mat outImg = image.clone();
         for (size_t i = 0; i < keypoints.size(); i++) {
             circle(outImg, keypoints[i].pt, keypoints[i].size, Scalar(255, 0, 255), -1);

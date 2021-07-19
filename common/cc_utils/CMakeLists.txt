@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 include_directories(${EIGEN3_INCLUDE_DIR})
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 catkin_package(
 	INCLUDE_DIRS include

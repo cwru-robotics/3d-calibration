@@ -5,7 +5,7 @@
 	<description>Image data acquisition utility for camera intrinsic calibration.</description>
 	<maintainer email="tes77@case.edu">Tom Shkurti</maintainer>
 	<!--What is roadprintz's code licensed as?-->
-	<license>TODO</license>
+	<license>LicenseRef-RoadPrintz-Proprietary</license>
 	
 	<buildtool_depend>catkin</buildtool_depend>
 	

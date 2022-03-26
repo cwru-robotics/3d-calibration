@@ -160,8 +160,10 @@ int main(int argc, char** argv) {
 		
 		image = vec_of_images[i_image];
 		cv::cvtColor(image, grayscaleImage, cv::COLOR_BGR2GRAY);
+		threshold( grayscaleImage, grayscaleImage, 10, 255, 0 );
 		bool patternfound;
 		if(circles){
+			//printf("FCG\n");
 			patternfound = findCirclesGrid(grayscaleImage, patternsize, centers, 1, circle_detector_ptr_);
 		} else{
 			patternfound = cv::findChessboardCorners(grayscaleImage, patternsize, centers);
@@ -231,10 +233,12 @@ int main(int argc, char** argv) {
 			//For each point...
 			if(circles){
 				cv::Point2f center;
+				//printf("%lu\n", centers.size());
 				for (int i_circle = 0; i_circle < target_x; i_circle++){
 					for (int j_circle = 0; j_circle < target_y; j_circle++) {
 						//Draw on the image
-						int n_circle = i_circle + j_circle*target_y;
+						int n_circle = j_circle*target_x + i_circle;
+						//printf("\t(%d, %d): %d\n", i_circle, j_circle, n_circle);
 						center = centers[n_circle];
 						cv::circle( image, center, 2, cv::Scalar(0,0,255), 2);
 				
@@ -250,10 +254,10 @@ int main(int argc, char** argv) {
 			} else{
 				cv::drawChessboardCorners(image, patternsize, centers, true);
 				cv::Point2f center;
-				for (int i_circle = 0; i_circle < target_y; i_circle++){
-					for (int j_circle = 0; j_circle < target_x; j_circle++) {
+				for (int i_circle = 0; i_circle <= target_y; i_circle++){
+					for (int j_circle = 0; j_circle <= target_x; j_circle++) {
 						//Draw on the image
-						int n_circle = i_circle*target_x + j_circle;
+						int n_circle = j_circle * target_x + i_circle;
 						center = centers[n_circle];
 						cv::circle( image, center, 2, cv::Scalar(0,0,255), 2);
 				
@@ -275,12 +279,12 @@ int main(int argc, char** argv) {
 		
 		cv::imshow("Src image", image);
 		///imwrite(data_path + "red_cirlces.png", image);
-		cv::waitKey(100);
+		cv::waitKey(50);
 	}
 	
 	printf(
 		"\n\e[36mDetection process complete. \e[1m%d / %d\e[39m\e[36m patterns not found (\e[1m%f%%\e[36m).\e[39m\n\n",
-		failures, n_images, 100.0 * (float)failures/(float)n_images
+		failures, n_images, 100.0 - 100.0 * (float)failures/(float)n_images
 	);
 	calib_output_file.close();
 	

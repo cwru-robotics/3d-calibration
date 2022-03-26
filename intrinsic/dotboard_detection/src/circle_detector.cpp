@@ -76,7 +76,7 @@
 #endif
 #endif
 
-const double CLUSTER_ACCEPTANCE_RADIUS = 10; //10 pixels??
+const double CLUSTER_ACCEPTANCE_RADIUS = 2; //10 pixels??
 
 int num_findCircles_calls=0;
 
@@ -122,11 +122,11 @@ namespace cv {
         circleColor = 0;
 
         filterByArea = true;
-        minArea = 25; //25;
+        minArea = 10; //25;
         maxArea = 10000; //10000; //5000;
 
         filterByCircularity = true; //false;
-        minCircularity = 0.8f;
+        minCircularity = 0.4f;
         maxCircularity = std::numeric_limits<float>::max();
 
         filterByInertia = false;
@@ -134,7 +134,7 @@ namespace cv {
         maxInertiaRatio = std::numeric_limits<float>::max();
 
         filterByConvexity = true;
-        minConvexity = 0.5f;
+        minConvexity = 0.2f;
         maxConvexity = std::numeric_limits<float>::max();
     }
 
@@ -255,7 +255,7 @@ namespace cv {
         //     for( size_t k = 0; k < contours0.size(); k++ ) 
         //      approxPolyDP(Mat(contours0[k]), contours[k], eps, true);
 
-        //printf("found %d contours\n", n_contours);
+       // printf("found %d contours\n", n_contours);
         // loop on all contours
         int n_survivors = 0;
         for (size_t contourIdx = 0; contourIdx < contours.size(); contourIdx++) {
@@ -268,9 +268,9 @@ namespace cv {
             if (params.filterByArea) {
                 double area = moms.m00;
                 circleArea = area;
-                //if (area < params.minArea || area >= params.maxArea) {
-                //    printf("rejected for area = %f\n",circleArea);
-                //}
+                if (area < params.minArea || area >= params.maxArea) {
+                    //printf("rejected for area = %f\n",circleArea);
+                }
                 //else {printf("area= %f\n",circleArea); }
                 if (circleArea > 2000) {
                     //cout << "large circle, contour:  " << contourIdx << endl;

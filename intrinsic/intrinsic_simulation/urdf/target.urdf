@@ -31,10 +31,10 @@
 			/>
 			<geometry>
 				<xacro:if value="${x == 1 and y == yml_dict_target['target_y']}">
-					<cylinder length="0.001" radius="${yml_dict_target['target_radius'] * 1.5}"/>
+					<cylinder length="0.002" radius="${yml_dict_target['target_radius'] * 1.5}"/>
 				</xacro:if>
 				<xacro:unless value="${x == 1 and y == yml_dict_target['target_y']}">
-					<cylinder length="0.001" radius="${yml_dict_target['target_radius']}"/>
+					<cylinder length="0.002" radius="${yml_dict_target['target_radius']}"/>
 				</xacro:unless>
 			</geometry>
 		</visual>

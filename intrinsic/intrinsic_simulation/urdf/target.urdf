@@ -45,7 +45,7 @@
 	
 
 	<!-- Main model -->
- 	<link name="world"/>
+ 	<!--link name="world"/-->
  	
 	<link name="sled_head">
 		<!--Every element needs an inertial for some reason...-->
@@ -56,11 +56,11 @@
 		</inertial>
 	</link>
 
-	<joint name="sled_head_joint" type="fixed">
+	<!--joint name="sled_head_joint" type="fixed">
 		<parent link="world"/>
 		<child link="sled_head"/>
 		<origin rpy="$(arg sled_rpy)" xyz="$(arg sled_xyz)"/>
-	</joint>
+	</joint-->
 	
 	<link name="target">
 		<!--Every element needs an inertial for some reason...-->
@@ -91,6 +91,7 @@
 	</link>
 	<gazebo reference="target">
 		<material>Gazebo/White</material>
+		<turnGravityOff>1</turnGravityOff>
 	</gazebo>
 	
 	
@@ -123,6 +124,7 @@
 	</link>
 	<gazebo reference="dots">
 		<material>Gazebo/Black</material>
+		<turnGravityOff>1</turnGravityOff>
 	</gazebo>
 	
 	

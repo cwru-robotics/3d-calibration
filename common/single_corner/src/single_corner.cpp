@@ -99,7 +99,7 @@ namespace sc {
                 close_to_center_lines.push_back(lines[i]);
             }
         }
-        cv::imshow("All Lines", all);
+        // cv::imshow("All Lines", all);
 
         // if couldn't find center, return top left corner
         if (close_to_center_lines.empty()) 
@@ -128,8 +128,8 @@ namespace sc {
             return cv::Point2d(0,0);
         }
 
-        double opposition_rho = lines[opposition_index][0];
-        double opposition_theta = lines[opposition_index][1];
+        double opposition_rho = close_to_center_lines[opposition_index][0];
+        double opposition_theta = close_to_center_lines[opposition_index][1];
         //printf("Opposition theta is %f.\n", lines[opposition_index][1]);
 
         //Calculate the intersection of the lines.
@@ -153,16 +153,6 @@ namespace sc {
         p2o.x = cvRound(x0_o - 1000 * -b_o);
         p2o.y = cvRound(y0_o - 1000 * a_o);
 
-        cv::Mat both = img.clone();
-        cv::line(both, p1s, p2s, cv::Scalar(0, 0, 255), 1, cv::LINE_AA);
-        cv::line(both, p1o, p2o, cv::Scalar(255, 0, 0), 1, cv::LINE_AA);
-        cv::circle(both, pt_C, acceptable_radius, cv::Scalar(0,255,0));
-        cv::drawMarker( both, pt_C,	cv::Scalar(0, 255, 0), cv::MARKER_TILTED_CROSS, 9);
-        cv::imshow("Intersection Lines", both);
-
-        string ws_path = getenv("ROS_WORKSPACE");
-        cv::imwrite(ws_path + "/debug_img/" + "corner_img.jpg", both);
-
         double x1 = p1s.x;
         double y1 = p1s.y;
         double x2 = p2s.x;
@@ -177,7 +167,18 @@ namespace sc {
         output.x = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / d;
         output.y = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / d;
 
-        if(cv::waitKey()) cv::destroyAllWindows();
+        cv::Mat both = img.clone();
+        cv::line(both, p1s, p2s, cv::Scalar(0, 0, 255), 1, cv::LINE_AA);
+        cv::line(both, p1o, p2o, cv::Scalar(255, 0, 0), 1, cv::LINE_AA);
+        cv::circle(both, pt_C, acceptable_radius, cv::Scalar(0,255,0));
+        cv::drawMarker( both, pt_C,	cv::Scalar(0, 255, 0), cv::MARKER_TILTED_CROSS, 9);
+        cv::drawMarker( both, output,	cv::Scalar(0, 0, 255), cv::MARKER_TILTED_CROSS, 9);
+        // cv::imshow("Intersection Lines", both);
+
+        string ws_path = getenv("ROS_WORKSPACE");
+        cv::imwrite(ws_path + "/debug_img/" + "corner_img.jpg", both);
+
+        // if(cv::waitKey()) cv::destroyAllWindows();
 
         return output;
     }

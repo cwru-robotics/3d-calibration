@@ -2,8 +2,8 @@
 <robot name="simple_camera" xmlns:xacro="http://ros.org/wiki/xacro">
 	<xacro:include filename="$(find cwru_ros_camera)/modular_camera.urdf" />
 
-	<xacro:property name="gt_file" default="$(find intrinsic_simulation)/tests/basic_camera.yml"/>
-	<xacro:property name="yml_dict" value="${load_yaml(gt_file)}"/>
+	<xacro:arg name="gt_file" default="$(find intrinsic_simulation)/tests/basic_camera.yml"/>
+	<xacro:property name="yml_dict" value="${load_yaml('$(arg gt_file)')}"/>
 
  	<link name="world"/>
  	

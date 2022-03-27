@@ -22,7 +22,7 @@
 		command="
 			$(find xacro)/xacro
 			'$(find intrinsic_simulation)/urdf/camera.urdf'
-			gt_file:=cam_file
+			gt_file:=$(arg cam_file)
 		"
 	/>
 	<node

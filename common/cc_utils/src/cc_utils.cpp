@@ -20,7 +20,7 @@ namespace cc_utils{
 		ceres::CallbackReturnType operator()(const ceres::IterationSummary& summary) {
 			cv::namedWindow("Iteration Projection", cv::WINDOW_GUI_EXPANDED | cv::WINDOW_NORMAL);
 			cv::imshow("Iteration Projection", debug_mat);
-			cv::waitKey(1000);
+			cv::waitKey(500);
 			//cv::imwrite("/home/tes77/dbg_img_" + std::to_string(cnt) + ".png", debug_mat);
 			cnt++;
 			//cv::waitKey();

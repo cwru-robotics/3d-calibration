@@ -160,7 +160,7 @@ int main(int argc, char** argv) {
 		
 		image = vec_of_images[i_image];
 		cv::cvtColor(image, grayscaleImage, cv::COLOR_BGR2GRAY);
-		threshold( grayscaleImage, grayscaleImage, 10, 255, 0 );
+		threshold( grayscaleImage, grayscaleImage, 75, 255, 0 );
 		bool patternfound;
 		if(circles){
 			//printf("FCG\n");
@@ -189,42 +189,73 @@ int main(int argc, char** argv) {
 			double camera_x, camera_y, camera_z;
 			double s;
 			
-			if(sled_x[1] == '-'){
-				s = -1.0;
-			} else{
-				s = 1.0;
-			}
+
 			if(sled_x[0] == 'x'){
+				if(sled_x[1] == '-'){
+					s = -1.0;
+				} else{
+					s = 1.0;
+				}
 				camera_x = sled_x_val * s;
 			} else if(sled_x[0] == 'y'){
+				if(sled_y[1] == '-'){
+					s = -1.0;
+				} else{
+					s = 1.0;
+				}
 				camera_y = sled_x_val * s;
 			} else {
+				if(sled_z[1] == '-'){
+					s = -1.0;
+				} else{
+					s = 1.0;
+				}
 				camera_z = sled_x_val * s;
 			}
 			
-			if(sled_y[1] == '-'){
-				s = -1.0;
-			} else{
-				s = 1.0;
-			}
 			if(sled_y[0] == 'x'){
+				if(sled_x[1] == '-'){
+					s = -1.0;
+				} else{
+					s = 1.0;
+				}
 				camera_x = sled_y_val * s;
 			} else if(sled_y[0] == 'y'){
+				if(sled_y[1] == '-'){
+					s = -1.0;
+				} else{
+					s = 1.0;
+				}
 				camera_y = sled_y_val * s;
 			} else {
+				if(sled_z[1] == '-'){
+					s = -1.0;
+				} else{
+					s = 1.0;
+				}
 				camera_z = sled_y_val * s;
 			}
 			
-			if(sled_z[1] == '-'){
-				s = -1.0;
-			} else{
-				s = 1.0;
-			}
 			if(sled_z[0] == 'x'){
+				if(sled_x[1] == '-'){
+					s = -1.0;
+				} else{
+					s = 1.0;
+				}
 				camera_x = sled_z_val * s;
 			} else if(sled_z[0] == 'y'){
+				if(sled_y[1] == '-'){
+					s = -1.0;
+				} else{
+					s = 1.0;
+				}
 				camera_y = sled_z_val * s;
 			} else {
+				if(sled_z[1] == '-'){
+					s = -1.0;
+				} else{
+					s = 1.0;
+				}
 				camera_z = sled_z_val * s;
 			}
 			
@@ -273,7 +304,7 @@ int main(int argc, char** argv) {
 			}
 			
 		} else{
-			printf("\t\e[33mPattern not found in image %d.\e[39m\n", i_image);
+			printf("\t\e[33mPattern not found in image %d.\e[39m\n", i_image + 1);
 			failures++;
 		}
 		

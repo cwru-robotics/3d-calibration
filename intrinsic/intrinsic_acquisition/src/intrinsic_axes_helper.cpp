@@ -101,7 +101,7 @@ void new_frame_CB(const sensor_msgs::Image::ConstPtr & im){
 	);
 	
 	//Draw the motion frame
-	cv::Point cam_x_terminus;
+	/*cv::Point cam_x_terminus;
 	cv::Point cam_y_terminus;
 	cv::Point cam_z_terminus;
 	
@@ -143,9 +143,9 @@ void new_frame_CB(const sensor_msgs::Image::ConstPtr & im){
 			case 'y': cam_z_terminus = n_y; break;
 			case 'z': cam_z_terminus = n_z; break;
 		}
-	}
+	}*/
 	
-	cv::Point s_origin = cv::Point(u_center - tenth * 2, v_center - tenth * 2);
+	/*cv::Point s_origin = cv::Point(u_center - tenth * 2, v_center - tenth * 2);
 	
 	cv::arrowedLine(
 		img,
@@ -193,18 +193,18 @@ void new_frame_CB(const sensor_msgs::Image::ConstPtr & im){
 		cv::FONT_HERSHEY_COMPLEX,
 		0.5,//Font size
 		cv::Scalar(200, 200, 0)
-	);
+	);*/
 
 	//Show the image with the things drawn on it.
 	cv::imshow("Camera and Axes", img);
-	cv::imshow("Controls", control_panel);
+	//cv::imshow("Controls", control_panel);
 	//For some reason. image won't display unless there is a nominal wait
 	//time between imshow() and the end of the function.
 	cv::waitKey(1);
 }
 
 //Drawing function for the control panel.
-void cp_draw(){
+/*void cp_draw(){
 	//Save bar.
 	cv::putText(
 		control_panel,
@@ -464,7 +464,7 @@ void control_click_cb(int event, int x, int y, int flags, void* param){
 	} else if(x > BUTTON_SIZE * 2){
 		xyz_behavior(operand);
 	}
-}
+}*/
 
 int main(int argc, char ** argv){
 
@@ -479,7 +479,7 @@ int main(int argc, char ** argv){
 	}
 	
 	//Load data from file if possible.
-	if(argc < 3){
+	/*if(argc < 3){
 		ROS_WARN("No TDF argument given. Saving will be disabled and default values will be used.");
 		file_path = "";
 	} else{
@@ -543,21 +543,26 @@ int main(int argc, char ** argv){
 			data_file["sled_z"] = z_map;
 		}
 		
-	}
+	}*/
 	
 	//Create visualization
 	cv::namedWindow("Camera and Axes");
 	
 	//Create control panel
-	cv::namedWindow("Controls");
+	/*cv::namedWindow("Controls");
 	control_panel = cv::Mat(BUTTON_SIZE * 4, BUTTON_SIZE * 3, CV_8UC3, cv::Scalar(0, 0, 0));
 	cp_draw();
-	cv::setMouseCallback("Controls", control_click_cb);
+	cv::setMouseCallback("Controls", control_click_cb);*/
 	
 	//Subscribe to image.
 	ros::Subscriber imsub = nh.subscribe(argv[1], 1, new_frame_CB);
 	
 	ROS_INFO("Axis helper has subscribed to %s and is waiting for images.", argv[1]);
+	
+	printf("\n\nUSAGE\n\n\tCamera axes are shown. Positive Z axis points into the image; farther away things have a more positive Z coordinate.");
+	printf("\n\n\tMove the target along one of its command axes, and then see what direction it moves on the camera. This is what goes in the string field.");
+	printf("\n\n\tFor instance, if you told the target to move in the positive X direction in its own coordinates, and it moved in the negative y direction in the camera's coordinates,");
+	printf("the entry would be \"sled_x: -y\"\n\n\n");
 	
 	//Good to go.
 	ros::spin();

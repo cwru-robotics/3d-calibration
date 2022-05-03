@@ -1,3 +1,0 @@
-<launch>
-	<node pkg="tf" type="static_transform_publisher" name="stf" args="1.05139 0.198079 0.299136 0.149348 0.313142 0.199631 forearm camera_corrected 1000"/>
-</launch>

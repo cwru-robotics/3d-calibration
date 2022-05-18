@@ -11,12 +11,12 @@
 	/>
 	<arg
 		name="intrinsic_initial"
-		default="$(find cam_cal)/calibrations/stella_sim.yml"
+		default="$(find intrinsic_simulation)/tests/basic_camera.yml"
 		doc="Initialization file which contains guesses at camera intrinsics."
 	/>
 	<arg
 		name="output"
-		default="$(find cam_cal)/calibrations/stella_calibrated.yml"
+		default=""
 		doc="Output file for finished calibration."
 	/>
 	

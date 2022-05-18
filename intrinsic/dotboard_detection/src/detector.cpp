@@ -252,6 +252,7 @@ int main(int argc, char** argv) {
 						;
 					}
 				}
+				//imwrite(vec_of_image_names[i_image] + "_red_cirlces.png", image);
 			} else{
 				cv::drawChessboardCorners(image, patternsize, centers, true);
 				cv::Point2f center;
@@ -279,8 +280,7 @@ int main(int argc, char** argv) {
 		}
 		
 		cv::imshow("Src image", image);
-		///imwrite(data_path + "red_cirlces.png", image);
-		cv::waitKey(50);
+		cv::waitKey(100);
 	}
 	
 	printf(

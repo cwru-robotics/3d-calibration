@@ -42,7 +42,7 @@ public:
 	){
 		return new ceres::AutoDiffCostFunction<CalibrationEntry, 2,//Residual output comes first.
 		//	Target translation	target rotation		base translation	base rotation	projection	distortion
-			3,			3,			3,			3,		4,		5
+			3,			3,			3,			3,		4,		5,		1,	1
 		>(new CalibrationEntry (//Just pass all the arguments in in the same order.
 			image_pixels_in, MILL_to_SLED_translation_in, TARGET_to_POINT_translation_in, r_x_in, r_y_in
 		));
@@ -61,6 +61,7 @@ public:
 		const T* SLED_to_TARGET_translation, const T* SLED_to_TARGET_rotation,
 		const T* CAM_to_MILL_translation, const T* CAM_to_MILL_rotation,
 		const T* projection, const T* distortion,
+		const T* z_distort_x, const T* z_distort_y,
 		
 		T* residual
 	) const {
@@ -90,9 +91,9 @@ public:
 		//	1c: MILL_to_SLED * SLED_to_TARGET * TARGET_to_POINT
 		//MILL to SLED is just a translation
 		T MILL_to_POINT [3] = {
-			T(MILL_to_SLED_translation[0]) + SLED_to_POINT[0],
-			T(MILL_to_SLED_translation[1]) + SLED_to_POINT[1],
-			T(MILL_to_SLED_translation[2]) + SLED_to_POINT[2]
+			T(MILL_to_SLED_translation[0] + MILL_to_SLED_translation[2] * sin(z_distort_x[0])) + SLED_to_POINT[0],
+			T(MILL_to_SLED_translation[1] + MILL_to_SLED_translation[2] * sin(z_distort_y[0])) + SLED_to_POINT[1],
+			T(MILL_to_SLED_translation[2] * cos(z_distort_y[0]) * cos(z_distort_x[0])) + SLED_to_POINT[2]
 		};
 		
 		/*std::cout << "MILL TO POINT\n";
@@ -278,6 +279,9 @@ int main(int argc, char** argv) {
 	
 	double distortion[5] = {k1_init, k2_init, k3_init, p1_init, p2_init};
 	
+	double z_distort_x = 0.0;
+	double z_distort_y = 0.0;
+	
 	//Set up visualization.
 	cc_utils::init_visualization(resolution_y, resolution_x, pixels, options);
 	
@@ -299,7 +303,8 @@ int main(int argc, char** argv) {
 		problem.AddResidualBlock(cost_function, NULL,
 			SLED_to_TARGET_t, SLED_to_TARGET_r,
 			CAM_to_MILL_t, CAM_to_MILL_r,
-			projection, distortion
+			projection, distortion,
+			&z_distort_x, &z_distort_y
 		);
 	}
 	
@@ -370,6 +375,8 @@ int main(int argc, char** argv) {
 	e_out << output_node;
 	e_out.close();
 	printf("\nSaved results to %s.\n\n\n", output);
+	
+	printf("\n\n Zx distort is %f, Zy distort is %f\n\n", z_distort_x, z_distort_y);
 
 	return 0;
 }

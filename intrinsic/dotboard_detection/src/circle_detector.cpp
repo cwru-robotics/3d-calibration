@@ -116,24 +116,24 @@ namespace cv {
         maxThreshold = 220;
         minRepeatability = 3;
         minDistBetweenCircles = 10;
-        minRadiusDiff = 50; //50; //10;
+        minRadiusDiff = 10; //50; //10;
 
         filterByColor = false;
         circleColor = 0;
 
         filterByArea = true;
-        minArea = 10; //25;
-        maxArea = 10000; //10000; //5000;
+        minArea = 100; //25;
+        maxArea = 100000; //10000; //5000;
 
         filterByCircularity = true; //false;
         minCircularity = 0.6f;
         maxCircularity = std::numeric_limits<float>::max();
 
-        filterByInertia = true;
+        filterByInertia = false;
         minInertiaRatio = 0.1f; //0.1f;
         maxInertiaRatio = std::numeric_limits<float>::max();
 
-        filterByConvexity = true;
+        filterByConvexity = false;
         minConvexity = 0.2f;
         maxConvexity = std::numeric_limits<float>::max();
     }

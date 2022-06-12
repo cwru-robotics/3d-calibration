@@ -52,6 +52,20 @@ void imcb(const sensor_msgs::Image::ConstPtr & im){
 		return;
 	}
 }
+bool got_image_2;
+cv::Mat img_2;
+void imcb_2(const sensor_msgs::Image::ConstPtr & im){
+	cv_bridge::CvImagePtr cv_ptr;
+	try {
+		cv_ptr = cv_bridge::toCvCopy(im);
+		img_2 = cv_ptr->image;
+		got_image_2 = true;
+		return;
+	} catch (cv_bridge::Exception &e) {
+		ROS_ERROR("Could not convert from encoding to 'bgr8'.");
+		return;
+	}
+}
 
 int main(int argc, char ** argv){
 	//ROS initialization
@@ -179,6 +193,7 @@ int main(int argc, char ** argv){
 	ROS_INFO("Successfully initialized test from TDF \"%s\".", argv[2]);
 	
 	ros::Subscriber img_sub = nh.subscribe(argv[1], 1, imcb);
+	ros::Subscriber img_sub_2 = nh.subscribe("/davinci_endo/right/image_raw", 1, imcb_2);
 	
 	got_image = false;
 	while(!got_image && ros::ok()){
@@ -242,8 +257,23 @@ int main(int argc, char ** argv){
 					cv::destroyAllWindows();
 					
 					cv::imwrite(
-						data_path + "/img_"+x_code+"_"+y_code+"_"+z_code+".png",
+						data_path + "/left/img_"+x_code+"_"+y_code+"_"+z_code+".png",
 						img
+					);
+					
+					got_image_2 = false;
+					while(!got_image_2 && ros::ok()){
+						ros::spinOnce();
+					}
+					
+					cv::namedWindow("Captured image");
+					cv::imshow("Captured image", img_2);
+					cv::waitKey(1000);
+					cv::destroyAllWindows();
+					
+					cv::imwrite(
+						data_path + "/right/img_"+x_code+"_"+y_code+"_"+z_code+".png",
+						img_2
 					);
 				}
 				i++;

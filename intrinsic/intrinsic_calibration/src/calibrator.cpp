@@ -41,8 +41,8 @@ public:
 		
 	){
 		return new ceres::AutoDiffCostFunction<CalibrationEntry, 2,//Residual output comes first.
-		//	Target translation	target rotation		base translation	base rotation	projection	distortion
-			3,			3,			3,			3,		4,		5,		1,	1
+		//	target rotation		base translation	base rotation	projection	distortion
+			3,			3,			3,		4,		5
 		>(new CalibrationEntry (//Just pass all the arguments in in the same order.
 			image_pixels_in, MILL_to_SLED_translation_in, TARGET_to_POINT_translation_in, r_x_in, r_y_in
 		));
@@ -58,7 +58,7 @@ public:
 	int r_x, r_y;
 	
 	template<typename T> bool operator()(//TODO Why are all these const / should all these be const?
-		const T* SLED_to_TARGET_translation, const T* SLED_to_TARGET_rotation,
+		const T* SLED_to_TARGET_rotation,
 		const T* CAM_to_MILL_translation, const T* CAM_to_MILL_rotation,
 		const T* projection, const T* distortion,
 		const T* z_distort_x, const T* z_distort_y,
@@ -81,7 +81,8 @@ public:
 		
 		//	1b: SLED_to_TARGET * TARGET_to_POINT
 		T SLED_to_POINT [3];
-		cc_utils::transformPoint_euler(SLED_to_TARGET_translation, SLED_to_TARGET_rotation, TARGET_to_POINT, SLED_to_POINT);
+		const T no_translation[3] = {T(0.0), T(0.0), T(0.0)};
+		cc_utils::transformPoint_euler(no_translation, SLED_to_TARGET_rotation, TARGET_to_POINT, SLED_to_POINT);
 		
 		/*std::cout << "SLED TO POINT\n";
 		std::cout << SLED_to_POINT[0] << "\n";
@@ -159,7 +160,7 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 	double CtM_init_x, CtM_init_y, CtM_init_z, CtM_init_r, CtM_init_p, CtM_init_w;
-	double trg_init_x, trg_init_y, trg_init_z, trg_init_r, trg_init_p, trg_init_w;
+	double trg_init_r, trg_init_p, trg_init_w;
 	int resolution_x, resolution_y;
 	try{
 		//Camera to mill
@@ -180,10 +181,6 @@ int main(int argc, char** argv) {
    		
    		
 		//Millhead to target
-		trg_init_x = position_file["sled_to_target_guess_x"].as<double>();
-		trg_init_y = position_file["sled_to_target_guess_y"].as<double>();
-		trg_init_z = position_file["sled_to_target_guess_z"].as<double>();
-		
 		trg_init_r = position_file["sled_to_target_guess_r"].as<double>();
 		trg_init_p = position_file["sled_to_target_guess_p"].as<double>();
 		trg_init_w = position_file["sled_to_target_guess_w"].as<double>();
@@ -266,7 +263,6 @@ int main(int argc, char** argv) {
 	ceres::Solver::Options options;
 	
 	//Initialize the unknown values from their defaults.
-	double SLED_to_TARGET_t [3] = {trg_init_x, trg_init_y, trg_init_z};
 	double SLED_to_TARGET_r [3] = {cc_utils::rtod(trg_init_r), cc_utils::rtod(trg_init_p), cc_utils::rtod(trg_init_w)};
 	double CAM_to_MILL_t [3] = {CtM_init_x, CtM_init_y, CtM_init_z};
 	double CAM_to_MILL_r [3] = {cc_utils::rtod(CtM_init_r), cc_utils::rtod(CtM_init_p), cc_utils::rtod(CtM_init_w)};
@@ -301,7 +297,7 @@ int main(int argc, char** argv) {
 		
 		//And then the global parameters to optimize
 		problem.AddResidualBlock(cost_function, NULL,
-			SLED_to_TARGET_t, SLED_to_TARGET_r,
+			SLED_to_TARGET_r,
 			CAM_to_MILL_t, CAM_to_MILL_r,
 			projection, distortion,
 			&z_distort_x, &z_distort_y
@@ -333,7 +329,6 @@ int main(int argc, char** argv) {
     	printf("\e[36mRMS value is \e[35m%f px\e[36m.\n", cc_utils::rms());
     	
     	std::printf("SLED to TARGET:\n");
-	std::printf("\tx = \e[35m%f\e[36m\ty = \e[35m%f\e[36m\tz = \e[35m%f\e[36m\n", SLED_to_TARGET_t[0], SLED_to_TARGET_t[1], SLED_to_TARGET_t[2]);
 	std::printf(
 		"\tr = \e[35m%f\e[36m\tp = \e[35m%f\e[36m\tw = \e[35m%f\e[36m\n", 
 		cc_utils::dtor(SLED_to_TARGET_r[0]),

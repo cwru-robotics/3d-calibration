@@ -1,5 +1,8 @@
 #include <thread>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
+
 #include <ros/ros.h>
 #include <cv_bridge/cv_bridge.h>
 #include <std_msgs/Bool.h>
@@ -39,12 +42,13 @@ void key_thread(){
 }
 
 bool got_image;
-cv::Mat img;
+std::vector<cv::Mat> imgs;
+int image_index;
 void imcb(const sensor_msgs::Image::ConstPtr & im){
 	cv_bridge::CvImagePtr cv_ptr;
 	try {
 		cv_ptr = cv_bridge::toCvCopy(im);
-		img = cv_ptr->image;
+		imgs[image_index] = cv_ptr->image;
 		got_image = true;
 		return;
 	} catch (cv_bridge::Exception &e) {
@@ -178,27 +182,29 @@ int main(int argc, char ** argv){
 	
 	ROS_INFO("Successfully initialized test from TDF \"%s\".", argv[2]);
 	
-	ros::Subscriber img_sub = nh.subscribe(argv[1], 1, imcb);
+	std::vector<std::string> names;
+	boost::split(names, argv[1], boost::is_any_of(","));
 	
-	got_image = false;
-	while(!got_image && ros::ok()){
-		ros::spinOnce();
-		ROS_WARN("Waiting for image data on topic %s.", argv[1]);
-		ros::Duration(1.0).sleep();
+	printf("Will listen for %lu cameras.\n", names.size());
+	
+	if(names.size() < 1){
+		return 0;
 	}
-	ROS_INFO("Recieving images on topic %s.", argv[1]);
-	ROS_INFO("Resolution is %d by %d.", img.rows, img.cols);
-	data_file["res_x"] = img.rows;
-	data_file["res_y"] = img.cols;
-	std::ofstream e_out;
-	e_out.open(argv[2]);
-	e_out << data_file;
-	e_out.close();
 	
-	std::string data_path = std::string(argv[2]);
-	data_path = data_path.substr(0, data_path.find_last_of("\\/"));
-	ROS_INFO("Data will be saved at %s.", data_path.c_str());
-	
+	std::string folder = std::string(argv[2]);
+	std::string filename = folder.substr(folder.find_last_of("/\\"));
+	folder = folder.substr(0, folder.find_last_of("/\\"));
+	boost::filesystem::path master_path = boost::filesystem::path(folder);//TODO Do this with Boost instead of string manipulation.
+	ROS_INFO("Data will be saved at root directory %s.", folder.c_str());
+	for(std::string name : names){
+		printf("\t%s\t:\t", name.c_str());
+		ros::topic::waitForMessage<sensor_msgs::Image>(name, nh);
+		//Can't write filenames with the slashes ROS uses to describe topics, so replace them with spaces (a character that cannot exist in a ROS topic):
+		std::string topic_file = replaceChar(name, '/', ' ');
+		boost::filesystem::create_directory(master_path / boost::filesystem::path(topic_file));
+		boost::filesystem::copy(argv[2], master_path / boost::filesystem::path(topic_file) / boost::filesystem::path(filename));
+		printf("OK\n");
+	}
 	
 	//TODO There is a more efficient to maneuver around but harder to
 	//algorithmically generate search pattern involving a series of
@@ -227,24 +233,36 @@ int main(int argc, char ** argv){
 				service_thread.detach();
 				
 				if(!skip){
-					got_image = false;
-					while(!got_image && ros::ok()){
-						ros::spinOnce();
+					for(std::string name : names){
+						sensor_msgs::Image::ConstPtr image_topic = ros::topic::waitForMessage<sensor_msgs::Image>(name, nh);
+						cv_bridge::CvImagePtr cv_ptr;
+						cv::Mat img;
+						try {
+							cv_ptr = cv_bridge::toCvCopy(image_topic);
+							img = cv_ptr->image;
+						} catch (cv_bridge::Exception &e) {
+							ROS_ERROR("Could not convert from encoding to 'bgr8'.");
+							continue;
+						}
+						
+						std::string x_code = replaceChar(std::to_string(x), '.', 'p');
+						std::string y_code = replaceChar(std::to_string(y), '.', 'p');
+						std::string z_code = replaceChar(std::to_string(z), '.', 'p');
+					
+						cv::namedWindow(name);
+						cv::imshow(name, img);
+						cv::waitKey(500);
+						cv::destroyAllWindows();
+						
+						cv::imwrite(
+							folder + "/" + replaceChar(name, '/', ' ') + "/img_"+x_code+"_"+y_code+"_"+z_code+".png",
+							img
+						);
+						//printf("%s\n", (folder + "/" +  replaceChar(name, '/', ' ') + "/img_"+x_code+"_"+y_code+"_"+z_code+".png").c_str());
 					}
-					
-					std::string x_code = replaceChar(std::to_string(x), '.', 'p');
-					std::string y_code = replaceChar(std::to_string(y), '.', 'p');
-					std::string z_code = replaceChar(std::to_string(z), '.', 'p');
-					
-					cv::namedWindow("Captured image");
-					cv::imshow("Captured image", img);
-					cv::waitKey(1000);
-					cv::destroyAllWindows();
-					
-					cv::imwrite(
-						data_path + "/img_"+x_code+"_"+y_code+"_"+z_code+".png",
-						img
-					);
+				}
+				if(!ros::ok()){
+					return 0;
 				}
 				i++;
 			}

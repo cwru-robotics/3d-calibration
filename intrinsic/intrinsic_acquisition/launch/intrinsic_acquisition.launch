@@ -7,7 +7,7 @@
 	<arg
 		name="topic"
 		default="/camera/image_raw_color"
-		doc="Topic name for camera images."
+		doc="Topic name for camera images. For multiple images, separate topic names with commas."
 	/>
 	
 	<node

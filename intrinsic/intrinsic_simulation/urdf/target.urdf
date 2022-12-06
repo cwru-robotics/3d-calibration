@@ -102,7 +102,7 @@
 			rpy="
 				${yml_dict_position['sled_to_target_r']}
 				${yml_dict_position['sled_to_target_p']}
-				${yml_dict_position['sled_to_target_y']}
+				${yml_dict_position['sled_to_target_w']}
 			"
 			xyz="
 				${yml_dict_position['sled_to_target_x']}

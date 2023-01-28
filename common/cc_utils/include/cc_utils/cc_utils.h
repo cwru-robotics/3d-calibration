@@ -88,6 +88,8 @@ namespace cc_utils{
 		T xp1 = point_x;
 		T yp1 = point_y;
 		T zp1 = point_z;
+		T u_undistort;
+		T v_undistort;
 		T xp_plane;
 		T yp_plane;
 	
@@ -113,29 +115,30 @@ namespace cc_utils{
 		std::cout<< "p1 " << p1 << "\n";
 		std::cout<< "p2 " << p2 << "\n\n";*/
 		
-		//Distortion.
-		T r2 = pow(xp_plane, T(2.0)) + pow(yp_plane, T(2.0));
-		T r4 = r2 * r2;
-		T r6 = r2 * r2 * r2;
-		
-		T X_radial = xp_plane * k1 * r2 + xp_plane * k2 * r4 + xp_plane * k3 * r6;
-		T Y_radial = yp_plane * k1 * r2 + yp_plane * k2 * r4 + yp_plane * k3 * r6;
-		
-		T X_tangential = T(2.0) * p1 * xp_plane * yp_plane + p2 * (r2 + T(2.0) * xp_plane * xp_plane);
-		T Y_tangential = p1 * (r2 + T(2.0) * yp_plane * yp_plane) + T(2.0) * p2 * xp_plane * yp_plane;
-		
-		T xd = xp_plane + X_radial + X_tangential;
-		T yd = yp_plane + Y_radial + Y_tangential;
-		
 		//T xd = xp_plane;
 		//T yd = yp_plane;
 		
 		//std::cout<< "x distorted " << xd << "\n";
 		//std::cout<< "y distorted " << yd << "\n\n";
 		
-		//Project
-		u = cx + fx * xd;
-		v = cy + fy * yd;
+		//Planarize
+		u_undistort = cx + fx * xp_plane;
+		v_undistort = cy + fy * yp_plane;
+		
+		
+		//Distortion.
+		T r2 = pow(u_undistort, T(2.0)) + pow(v_undistort, T(2.0));
+		T r4 = r2 * r2;
+		T r6 = r2 * r2 * r2;
+		
+		T X_radial = u_undistort * k1 * r2 + u_undistort * k2 * r4 + u_undistort * k3 * r6;
+		T Y_radial = v_undistort * k1 * r2 + v_undistort * k2 * r4 + v_undistort * k3 * r6;
+		
+		T X_tangential = T(2.0) * p1 * u_undistort * v_undistort + p2 * (r2 + T(2.0) * u_undistort * u_undistort);
+		T Y_tangential = p1 * (r2 + T(2.0) * v_undistort * v_undistort) + T(2.0) * p2 * u_undistort * v_undistort;
+		
+		u = u_undistort + X_radial + X_tangential;
+		v = v_undistort + Y_radial + Y_tangential;
 	
 		//std::cout<< "u projected " << u << "\n";
 		//std::cout<< "v projected " << v << "\n\n";

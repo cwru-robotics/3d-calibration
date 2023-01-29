@@ -1,14 +1,14 @@
 target_x: 8
 res_y: 640
 inc_sled_x: 0.05
-max_sled_x: 2.15
+max_sled_x: 0.25
 target_spacing: 0.0502
 target_y: 6
 target_radius: 0.01
-min_sled_x: 1.85
-min_sled_y: -0.22
-max_sled_y: 0.22
-inc_sled_y: 0.11
+min_sled_x: -0.25
+min_sled_y: -0.25
+max_sled_y: 0.25
+inc_sled_y: 0.05
 min_sled_z: 1.
 max_sled_z: 1.4
 inc_sled_z: 0.1
@@ -25,4 +25,4 @@ sled_to_target_guess_r: 0.0
 sled_to_target_guess_p: 0.0
 sled_to_target_guess_w: 0.0
 res_x: 480
-circles: false
+circles: true

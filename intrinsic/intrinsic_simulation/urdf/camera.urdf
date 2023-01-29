@@ -2,16 +2,19 @@
 <robot name="simple_camera" xmlns:xacro="http://ros.org/wiki/xacro">
 	<xacro:include filename="$(find cwru_ros_camera)/modular_camera.urdf" />
 
-	<xacro:arg name="gt_file" default="$(find intrinsic_simulation)/tests/basic_camera.yml"/>
-	<xacro:property name="yml_dict" value="${load_yaml('$(arg gt_file)')}"/>
+	<xacro:arg name="gt_file_left" default="$(find intrinsic_simulation)/tests/basic_camera_1.yml"/>
+	<xacro:property name="yml_dict_1" value="${load_yaml('$(arg gt_file_left)')}"/>
+	
+	<xacro:arg name="gt_file_right" default="$(find intrinsic_simulation)/tests/basic_camera_2.yml"/>
+	<xacro:property name="yml_dict_2" value="${load_yaml('$(arg gt_file_right)')}"/>
 
  	<link name="world"/>
  	
-	<link name="camera_optical_link_real">
+	<link name="camera_optical_link_left">
 		<visual>
 			<origin xyz="0 0 0.0" rpy="0 0 0"/>
 			<geometry>
-				<box size="0.1 0.1 0.1"/>
+				<box size="0.001 0.001 0.001"/>
 			</geometry>
 		</visual>
 		<!--Every element needs an inertial for some reason...-->
@@ -22,30 +25,70 @@
 		</inertial>
 	</link>
 
-	<joint name="camera_optical_joint_real" type="fixed">
+	<joint name="camera_optical_joint_left" type="fixed">
 		<parent link="world"/>
-		<child link="camera_optical_link_real"/>
+		<child link="camera_optical_link_left"/>
 		<origin 
-			rpy="${yml_dict['mill_to_camera_r']} ${yml_dict['mill_to_camera_p']} ${yml_dict['mill_to_camera_w']}"
-			xyz="${yml_dict['mill_to_camera_x']} ${yml_dict['mill_to_camera_y']} ${yml_dict['mill_to_camera_z']}"
+			rpy="${yml_dict_1['mill_to_camera_r']} ${yml_dict_1['mill_to_camera_p']} ${yml_dict_1['mill_to_camera_w']}"
+			xyz="${yml_dict_1['mill_to_camera_x']} ${yml_dict_1['mill_to_camera_y']} ${yml_dict_1['mill_to_camera_z']}"
 		/>
 	</joint>
-	
 	<xacro:cwru_camera
-		parent="camera_optical_link_real"
-		image_topic="/camera/image_raw_color"
-		info_topic="/camera/camera_info"
-		k1="${yml_dict['k1']}"
-		k2="${yml_dict['k2']}"
-		k3="${yml_dict['k3']}"
-		p1="${yml_dict['p1']}"
-		p2="${yml_dict['p2']}"
+		parent="camera_optical_link_left"
+		image_topic="/davinci_endo/left/image_raw"
+		info_topic="/davinci_endo/left/camera_info"
+		k1="${yml_dict_1['k1']}"
+		k2="${yml_dict_1['k2']}"
+		k3="${yml_dict_1['k3']}"
+		p1="${yml_dict_1['p1']}"
+		p2="${yml_dict_1['p2']}"
 		
-		f_x="${yml_dict['fx']}"
-		f_y="${yml_dict['fy']}"
-		c_x="${yml_dict['cx']}"
-		c_y="${yml_dict['cy']}"
-		r_u="${yml_dict['resolution_u']}"
-		r_v="${yml_dict['resolution_v']}"
+		f_x="${yml_dict_1['fx']}"
+		f_y="${yml_dict_1['fy']}"
+		c_x="${yml_dict_1['cx']}"
+		c_y="${yml_dict_1['cy']}"
+		r_u="${yml_dict_1['resolution_u']}"
+		r_v="${yml_dict_1['resolution_v']}"
+	/>
+	
+	<link name="camera_optical_link_right">
+		<visual>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+			<geometry>
+				<box size="0.001 0.001 0.001"/>
+			</geometry>
+		</visual>
+		<!--Every element needs an inertial for some reason...-->
+		<inertial>
+			<mass value="1e-5" />
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+		</inertial>
+	</link>
+
+	<joint name="camera_optical_joint_right" type="fixed">
+		<parent link="world"/>
+		<child link="camera_optical_link_right"/>
+		<origin 
+			rpy="${yml_dict_2['mill_to_camera_r']} ${yml_dict_2['mill_to_camera_p']} ${yml_dict_2['mill_to_camera_w']}"
+			xyz="${yml_dict_2['mill_to_camera_x']} ${yml_dict_2['mill_to_camera_y']} ${yml_dict_2['mill_to_camera_z']}"
+		/>
+	</joint>
+	<xacro:cwru_camera
+		parent="camera_optical_link_right"
+		image_topic="/davinci_endo/right/image_raw"
+		info_topic="/davinci_endo/right/camera_info"
+		k1="${yml_dict_2['k1']}"
+		k2="${yml_dict_2['k2']}"
+		k3="${yml_dict_2['k3']}"
+		p1="${yml_dict_2['p1']}"
+		p2="${yml_dict_2['p2']}"
+		
+		f_x="${yml_dict_2['fx']}"
+		f_y="${yml_dict_2['fy']}"
+		c_x="${yml_dict_2['cx']}"
+		c_y="${yml_dict_2['cy']}"
+		r_u="${yml_dict_2['resolution_u']}"
+		r_v="${yml_dict_2['resolution_v']}"
 	/>
 </robot>

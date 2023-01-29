@@ -12,9 +12,9 @@ inc_sled_y: 0.05
 min_sled_z: 1.
 max_sled_z: 1.4
 inc_sled_z: 0.1
-sled_x: y-
-sled_y: x-
-sled_z: z-
+sled_x: x+
+sled_y: y+
+sled_z: z+
 mill_to_camera_guess_x: 0.9
 mill_to_camera_guess_y: 0.57
 mill_to_camera_guess_z: -0.12

@@ -314,7 +314,7 @@ int main(int argc, char** argv) {
     	double MtC_x, MtC_y, MtC_z,	MtC_r, MtC_p, MtC_w;
 	Eigen::Affine3d b = cc_utils::invert_eul(
 		CAM_to_MILL_t[0], CAM_to_MILL_t[1], CAM_to_MILL_t[2],
-		cc_utils::dtor(CAM_to_MILL_r[0]), cc_utils::dtor(CAM_to_MILL_r[0]), cc_utils::dtor(CAM_to_MILL_r[0]),
+		cc_utils::dtor(CAM_to_MILL_r[0]), cc_utils::dtor(CAM_to_MILL_r[1]), cc_utils::dtor(CAM_to_MILL_r[2]),
 		
 		MtC_x, MtC_y, MtC_z,	MtC_r, MtC_p, MtC_w
 	);

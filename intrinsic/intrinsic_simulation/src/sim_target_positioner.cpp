@@ -37,7 +37,7 @@ bool target_move_CB(turtlesim::Spawn::Request & req, turtlesim::Spawn::Response 
 	
 	double target_position_r = fRand(-20.0, 20.0) * M_PI / 180.0;
 	double target_position_p = fRand(-20.0, 20.0) * M_PI / 180.0;
-	double target_position_w = fRand(-30.0, 30.0) * M_PI / 180.0;
+	double target_position_w = fRand(-20.0, 20.0) * M_PI / 180.0;
 	
 	double cr = cos(target_position_r * 0.5);
 	double sr = sin(target_position_r * 0.5);

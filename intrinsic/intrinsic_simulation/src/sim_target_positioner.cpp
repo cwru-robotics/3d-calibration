@@ -35,10 +35,9 @@ bool target_move_CB(turtlesim::Spawn::Request & req, turtlesim::Spawn::Response 
 	pos.request.model_state.pose.position.y = req.y;
 	pos.request.model_state.pose.position.z = req.theta;
 	
-	srand(req.x + req.y + req.theta);
-	double target_position_r = fRand(-20.0, 20.0) * 180.0 / M_PI;
-	double target_position_p = fRand(-20.0, 20.0) * 180.0 / M_PI;
-	double target_position_w = fRand(-30.0, 30.0) * 180.0 / M_PI;
+	double target_position_r = fRand(-20.0, 20.0) * M_PI / 180.0;
+	double target_position_p = fRand(-20.0, 20.0) * M_PI / 180.0;
+	double target_position_w = fRand(-30.0, 30.0) * M_PI / 180.0;
 	
 	double cr = cos(target_position_r * 0.5);
 	double sr = sin(target_position_r * 0.5);
@@ -64,6 +63,8 @@ int main(int argc, char ** argv){
 	//ROS initialization
 	ros::init(argc, argv, "sim_placer");
 	ros::NodeHandle nh;
+	
+	srand(12345);
 	
 	ros::ServiceServer motion_maker = nh.advertiseService("/motion_command", target_move_CB);
 	gz_client = nh.serviceClient<gazebo_msgs::SetModelState>("/gazebo/set_model_state");

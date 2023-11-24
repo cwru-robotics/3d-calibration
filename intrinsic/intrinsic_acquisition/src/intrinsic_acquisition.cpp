@@ -201,8 +201,11 @@ int main(int argc, char ** argv){
 		ros::topic::waitForMessage<sensor_msgs::Image>(name, nh);
 		//Can't write filenames with the slashes ROS uses to describe topics, so replace them with spaces (a character that cannot exist in a ROS topic):
 		std::string topic_file = replaceChar(name, '/', ' ');
-		boost::filesystem::create_directory(master_path / boost::filesystem::path(topic_file));
-		boost::filesystem::copy(argv[2], master_path / boost::filesystem::path(topic_file) / boost::filesystem::path(filename));
+		try{
+			boost::filesystem::create_directory(master_path / boost::filesystem::path(topic_file));
+			boost::filesystem::copy(argv[2], master_path / boost::filesystem::path(topic_file) / boost::filesystem::path(filename));
+		} catch(std::exception e){
+		}
 		printf("OK\n");
 	}
 	

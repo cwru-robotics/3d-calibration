@@ -1,25 +1,25 @@
 resolution_u: 640
 resolution_v: 480
-fx: 767.1967462281409
-fy: 767.136076978906
-cx: 364.8331804846785
-cy: 322.5694925751582
-k1: -0.2490469798213525
-k2: 0.2599382281624702
-k3: 0.9202717306541889
-p1: -0.002355638624867364
-p2: -0.008665383617607041
+fx: 534.0
+fy: 534.0
+cx: 309.0
+cy: 238.0
+k1: -0.1623
+k2: 0.4
+k3: -0.04
+p1: -0.00154
+p2: 0.0067
 
 
-mill_to_camera_x:  0.0
+mill_to_camera_x:  -0.2
 mill_to_camera_y: 0
-mill_to_camera_z: 0
+mill_to_camera_z: 0.12
 mill_to_camera_r: 0
 mill_to_camera_p: 0
 mill_to_camera_w: 0
 
-sled_to_target_x: -0.2
-sled_to_target_y: -0.125
+sled_to_target_x: -0.0
+sled_to_target_y: -0.0
 sled_to_target_z: 0.0
 sled_to_target_r: 0.0
 sled_to_target_p: 0.0

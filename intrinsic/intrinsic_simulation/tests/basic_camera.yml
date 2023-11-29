@@ -13,7 +13,7 @@ p2: 0.0067
 
 mill_to_camera_x:  -0.2
 mill_to_camera_y: 0
-mill_to_camera_z: 0.12
+mill_to_camera_z: -0.15
 mill_to_camera_r: 0
 mill_to_camera_p: 0
 mill_to_camera_w: 0

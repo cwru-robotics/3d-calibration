@@ -160,7 +160,7 @@ int main(int argc, char** argv) {
 		
 		image = vec_of_images[i_image];
 		cv::cvtColor(image, grayscaleImage, cv::COLOR_BGR2GRAY);
-		//threshold( grayscaleImage, grayscaleImage, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+		threshold( grayscaleImage, grayscaleImage, 128, 255, cv::THRESH_BINARY /*| cv::THRESH_OTSU*/);
 		//cv::adaptiveThreshold(grayscaleImage, grayscaleImage, 255.0, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 51, 0.0);
 		bool patternfound;
 		if(circles){
@@ -276,7 +276,10 @@ int main(int argc, char** argv) {
 			
 		} else{
 			printf("\t\e[33mPattern not found in image %d.\e[39m\n", i_image + 1);
+			std::string imname = vec_of_image_names[i_image];
+			boost::filesystem::remove(boost::filesystem::path(imname));
 			failures++;
+			
 		}
 		
 		cv::imshow("Src image", image);

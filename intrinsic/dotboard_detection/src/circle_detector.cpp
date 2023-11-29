@@ -76,7 +76,7 @@
 #endif
 #endif
 
-const double CLUSTER_ACCEPTANCE_RADIUS = 10; //10 pixels??
+const double CLUSTER_ACCEPTANCE_RADIUS = 5; //10 pixels??
 
 int num_findCircles_calls=0;
 
@@ -115,14 +115,14 @@ namespace cv {
         minThreshold = 50;
         maxThreshold = 220;
         minRepeatability = 3;
-        minDistBetweenCircles = 10;
-        minRadiusDiff = 10; //50; //10;
+        minDistBetweenCircles = 5;
+        minRadiusDiff = 50; //50; //10;
 
         filterByColor = false;
         circleColor = 0;
 
         filterByArea = true;
-        minArea = 100; //25;
+        minArea = 25; //25;
         maxArea = 100000; //10000; //5000;
 
         filterByCircularity = true; //false;

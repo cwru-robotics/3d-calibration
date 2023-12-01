@@ -18,7 +18,7 @@ namespace cc_utils{
 		~VisualCallback() {}
 	
 		ceres::CallbackReturnType operator()(const ceres::IterationSummary& summary) {
-			cv::namedWindow("Iteration Projection", cv::WINDOW_GUI_EXPANDED | cv::WINDOW_NORMAL);
+			/*cv::namedWindow("Iteration Projection", cv::WINDOW_GUI_EXPANDED | cv::WINDOW_NORMAL);
 			cv::imshow("Iteration Projection", debug_mat);
 			cv::waitKey(500);
 			//cv::imwrite("/home/tes77/dbg_img_" + std::to_string(cnt) + ".png", debug_mat);
@@ -30,7 +30,7 @@ namespace cc_utils{
 			cc_utils::v_calc.clear();
 			cc_utils::v_real.clear();
 		
-			the_ground_truth.copyTo(debug_mat);
+			the_ground_truth.copyTo(debug_mat);*/
 			return ceres::SOLVER_CONTINUE;
 		}
 	};
@@ -56,12 +56,12 @@ namespace cc_utils{
 	}
 	
 	void add_to_visualization(double u, double v, double u_base, double v_base){
-		u_calc.push_back(u);
+		/*u_calc.push_back(u);
 		v_calc.push_back(v);
 		u_real.push_back(u_base);
 		v_real.push_back(v_base);
 		
-		cv::drawMarker(debug_mat, cv::Point(u, v), cv::Scalar(0, 255, 0), cv::MARKER_CROSS, 5);
+		cv::drawMarker(debug_mat, cv::Point(u, v), cv::Scalar(0, 255, 0), cv::MARKER_CROSS, 5);*/
 	}
 	
 	double rms(){

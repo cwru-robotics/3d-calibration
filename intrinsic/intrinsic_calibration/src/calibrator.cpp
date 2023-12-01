@@ -1,5 +1,7 @@
 #include <fstream>
 #include <iostream>
+#include <chrono>
+#include <ctime>  
 
 #include <Eigen/Eigen>
 
@@ -304,11 +306,18 @@ int main(int argc, char** argv) {
 	cc_utils::bound_rotation(problem, CAM_to_MILL_r);
 	
 	//Run the solver!
-	options.minimizer_progress_to_stdout = true;
+	options.minimizer_progress_to_stdout = false;
 	options.linear_solver_type = ceres::DENSE_SCHUR;
 	options.max_num_iterations = 1000;
 	ceres::Solver::Summary summary;
+	//Think auto is bad practice but type def is really long...
+	auto begin_time = std::chrono::system_clock::now();
     	ceres::Solve(options, &problem, &summary);
+    	auto end_time = std::chrono::system_clock::now();
+    	
+    	std::chrono::duration<double> delta = (end_time - begin_time);
+    	std::cout << "\nElapsed time is " << delta.count() << "\n";
+    	
     	
     	//Convert the camera-to-mill transform back into mill-to-camera for easy comparison
     	double MtC_x, MtC_y, MtC_z,	MtC_r, MtC_p, MtC_w;

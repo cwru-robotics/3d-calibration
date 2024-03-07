@@ -339,6 +339,13 @@ int main(int argc, char** argv) {
 	std::printf("\t%f\t%f\t%f\t%f\n", b.matrix()(2, 0), b.matrix()(2, 1), b.matrix()(2, 2), b.matrix()(2, 3));
 	std::printf("\t%f\t%f\t%f\t%f\e[36m\n", b.matrix()(3, 0), b.matrix()(3, 1), b.matrix()(3, 2), b.matrix()(3, 3));
 	
+	printf("In long form that is %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",
+		b.matrix()(0, 0), b.matrix()(0, 1), b.matrix()(0, 2), b.matrix()(0, 3),
+		b.matrix()(1, 0), b.matrix()(1, 1), b.matrix()(1, 2), b.matrix()(1, 3),
+		b.matrix()(2, 0), b.matrix()(2, 1), b.matrix()(2, 2), b.matrix()(2, 3),
+		b.matrix()(3, 0), b.matrix()(3, 1), b.matrix()(3, 2), b.matrix()(3, 3)
+	);
+	
 	std::printf("INTRINSICS:\n");
 	std::printf(
 		"\tfx = \e[35m%f\e[36m\tfy = \e[35m%f\e[36m\t cx = \e[35m%f\e[36m\t cy = \e[35m%f\e[36m\n",

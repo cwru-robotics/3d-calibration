@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <unistd.h>
 
 #include <Eigen/Eigen>
 
@@ -137,17 +138,14 @@ public:
 };
 
 int main(int argc, char** argv) {
-	if(argc < 4){
-		printf("\e[33mUsage: rosrun intrinsic_calibration calibrator /path/to/data.csv /path/to/initial/position.yml /path/to/initial/intrinsics.yml [path/to/output.yml]\e[39m\n");
-		return 0;
+
+	for(int i = 0; i < argc; i++){
+		printf("%s\n", argv[i]);
 	}
-	
-	char * output;
+
 	if(argc < 5){
-		printf("\nNo designated output file given, calibrated data will be written directly to the initialization file.\n");
-		output = argv[3];
-	} else {
-		output = argv[4];
+		printf("\e[33mUsage: rosrun intrinsic_calibration calibrator /path/to/data.csv /path/to/initial/position.yml /path/to/initial/intrinsics.yml camera-name [-o path/to/output.yml] [-p path/to/position.yml]\e[39m\n");
+		return 0;
 	}
 	
 	//Read in initialization info
@@ -155,7 +153,7 @@ int main(int argc, char** argv) {
 	try{
 		position_file = YAML::LoadFile(argv[2]);
 	} catch(YAML::BadFile e){//If file is not extant and well-formed...
-		printf("\e[39mPosition file \"%s\" does not exist or contains syntax errors.\e[31m\n", argv[2]);
+		printf("\e[39mInitial position file \"%s\" does not exist or contains syntax errors.\e[31m\n", argv[2]);
 		return 0;
 	}
 	double CtM_init_x, CtM_init_y, CtM_init_z, CtM_init_r, CtM_init_p, CtM_init_w;
@@ -256,6 +254,19 @@ int main(int argc, char** argv) {
 		mill_coordinates.push_back(mill_entry);
 	}
 	printf("Read in \e[1m%d\e[0m entries from %s.\n\n", n, argv[1]);
+	
+	char * output;
+	if(getopt(argc, argv, "o:") != -1){
+		output = optarg;
+	} else{
+		printf("\nNo designated output file given, calibrated data will be written directly to the initialization file.\n");
+		output = argv[3];
+	}
+	
+	char * position = NULL;
+	if(getopt(argc, argv, "p:") != -1){
+		position = optarg;
+	}
 	
 	//Build the optimization problem
 	ceres::Problem problem;
@@ -372,6 +383,19 @@ int main(int argc, char** argv) {
 	e_out << output_node;
 	e_out.close();
 	printf("\nSaved results to %s.\n\n\n", output);
+	
+	if(position != NULL){
+		std::ofstream fout = std::ofstream(position);
+		fout << "translation: [" << MtC_x << ", " << MtC_y << ", " << MtC_z << "]\n";
+		fout << "rpy: [" << MtC_r << ", " << MtC_p << ", " << MtC_w << "]\n";
+		fout << "matrix: [" <<
+			b.matrix()(0, 0) << ", " << b.matrix()(0, 1) << ", " << b.matrix()(0, 2) << ", " << b.matrix()(0, 3) << ", " <<
+			b.matrix()(1, 0) << ", " << b.matrix()(1, 1) << ", " << b.matrix()(1, 2) << ", " << b.matrix()(1, 3) << ", " <<
+			b.matrix()(2, 0) << ", " << b.matrix()(2, 1) << ", " << b.matrix()(2, 2) << ", " << b.matrix()(2, 3) << ", " <<
+			b.matrix()(3, 0) << ", " << b.matrix()(3, 1) << ", " << b.matrix()(3, 2) << ", " << b.matrix()(3, 3) << "]\n"
+		;
+		fout.close();
+	}
 
 	return 0;
 }

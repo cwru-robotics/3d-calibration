@@ -1,5 +1,10 @@
 <launch>
 	<arg
+		name="camname"
+		default="camera"
+		doc="Name of the camera (for calibration file tracking)."
+	/>
+	<arg
 		name="data"
 		default="$(find intrinsic_acquisition)/data/intrinsic_detections.csv"
 		doc="CSV file of point data."
@@ -19,12 +24,17 @@
 		default=""
 		doc="Output file for finished calibration."
 	/>
+	<arg
+		name="position"
+		default=""
+		doc="Output file for camera location w.r.t. stand."
+	/>
 	
 	<node
 		name="calibrator"
 		pkg="intrinsic_calibration"
 		type="int_calibrator"
-		args="$(arg data) $(arg position_initial) $(arg intrinsic_initial) $(arg output)"
+		args="$(arg data) $(arg position_initial) $(arg intrinsic_initial) $(arg camname) -o $(arg output) -p $(arg position)"
 		output="screen"
 		required="true"
 	/>

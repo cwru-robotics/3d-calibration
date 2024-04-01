@@ -210,11 +210,17 @@ int main(int argc, char ** argv){
 	//algorithmically generate search pattern involving a series of
 	//expanding cubical shells.
 	int i = 0;
-	int total = 
-		((int)((max_z - min_z) / inc_z)) * 
-		((int)((max_y - min_y) / inc_y)) *
-		((int)((max_x - min_x) / inc_x))
-	;
+	int total = 0;
+	for(double x = min_x; x <= max_x; x += inc_x){
+		for(double y = min_y; y <= max_y; y += inc_y){
+			for(double z = min_z; z <= max_z; z += inc_z){
+				total ++;
+			}
+		}
+	}
+	
+	printf("Will acquire %d images.\n", total);
+	
 	for(double x = min_x; x <= max_x; x += inc_x){
 		for(double y = min_y; y <= max_y; y += inc_y){
 			for(double z = min_z; z <= max_z; z += inc_z){

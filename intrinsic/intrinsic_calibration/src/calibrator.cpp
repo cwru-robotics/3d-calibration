@@ -314,6 +314,10 @@ int main(int argc, char** argv) {
 	cc_utils::bound_rotation(problem, SLED_to_TARGET_r);
 	cc_utils::bound_rotation(problem, CAM_to_MILL_r);
 	
+	//Bound the focal lengths to + values
+	problem.SetParameterLowerBound(projection, 0, 0.0);
+	problem.SetParameterLowerBound(projection, 1, 0.0);
+	
 	//Run the solver!
 	options.minimizer_progress_to_stdout = true;
 	options.linear_solver_type = ceres::DENSE_SCHUR;

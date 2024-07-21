@@ -17,7 +17,8 @@ public:
 		const double image_pixels_in[2],
 		const double MILL_to_SLED_translation_in[3],
 		const double TARGET_to_POINT_translation_in[3],
-		const int r_x_in, const int r_y_in
+		const int r_x_in, const int r_y_in,
+		const double cx_in, const double cy_in
 	){
 		image_pixels[0] = image_pixels_in[0];
 		image_pixels[1] = image_pixels_in[1];
@@ -32,20 +33,24 @@ public:
 		
 		r_x = r_x_in;
 		r_y = r_y_in;
+		
+		c_x = cx_in;
+		c_y = cy_in;
 	}
 	static ceres::CostFunction* Create(
 		const double image_pixels_in[2],
 		const double MILL_to_SLED_translation_in[3],
 		const double TARGET_to_POINT_translation_in[3],
 		
-		const int r_x_in, const int r_y_in
+		const int r_x_in, const int r_y_in,
+		const double c_x_in, const double c_y_in
 		
 	){
 		return new ceres::AutoDiffCostFunction<CalibrationEntry, 2,//Residual output comes first.
-		//	target rotation		base translation	base rotation	projection	distortion
-			3,			3,			3,		4,		5
+		//	target rotation	base translation	base rotation	projection	distortion
+			3,			3,			3,		2,		5
 		>(new CalibrationEntry (//Just pass all the arguments in in the same order.
-			image_pixels_in, MILL_to_SLED_translation_in, TARGET_to_POINT_translation_in, r_x_in, r_y_in
+			image_pixels_in, MILL_to_SLED_translation_in, TARGET_to_POINT_translation_in, r_x_in, r_y_in, c_x_in, c_y_in
 		));
 	}
 	
@@ -57,6 +62,7 @@ public:
 	double TARGET_to_POINT_translation[3];
 	//Globals
 	int r_x, r_y;
+	double c_x, c_y;
 	
 	template<typename T> bool operator()(//TODO Why are all these const / should all these be const?
 		const T* SLED_to_TARGET_rotation,
@@ -116,7 +122,7 @@ public:
 			CAM_to_POINT[0], CAM_to_POINT[1], CAM_to_POINT[2],
 			
 			//fx		fy		cx		cy
-			projection[0], projection[1], projection[2], projection[3],
+			projection[0], projection[1], T(c_x), T(c_y),
 			distortion[0], distortion[1], distortion[2], distortion[3], distortion[4],
 		
 			T(r_x), T(r_y),
@@ -205,7 +211,7 @@ int main(int argc, char** argv) {
 	try{
 		fx_init = intrinsic_file["fx"].as<double>();
 		fy_init = intrinsic_file["fy"].as<double>();
-		cx_init = intrinsic_file["cx"].as<double>();
+		cx_init = intrinsic_file["cx"].as<double>();//These two values are not used (replaced by the calculation of c_fixed), but I am keeping them around for consistency with the base files.
 		cy_init = intrinsic_file["cy"].as<double>();
 		
 		k1_init = intrinsic_file["k1"].as<double>();
@@ -217,6 +223,10 @@ int main(int argc, char** argv) {
 		printf("\e[39mIntrinsic parse exception \"%s\".\e[31m\n", e.what());
 		return 0;
 	}
+	
+	double cx_fixed = (double)resolution_x / 2.0;
+	double cy_fixed = (double)resolution_y / 2.0;
+	
 	printf("Successfully initialized intrinsics from %s.\n", argv[3]);
 	
 	//Read in data
@@ -278,9 +288,9 @@ int main(int argc, char** argv) {
 	double CAM_to_MILL_r [3] = {cc_utils::rtod(CtM_init_r), cc_utils::rtod(CtM_init_p), cc_utils::rtod(CtM_init_w)};
 	
 
-	double projection[4] = {
+	double projection[2] = {
 		//fx		fy		cx		cy
-		fx_init,	fy_init,	cx_init,	cy_init
+		fx_init,	fy_init//,	cx_init,	cy_init	Projection center is now fixed.
 	};
 	
 	double distortion[5] = {k1_init, k2_init, k3_init, p1_init, p2_init};
@@ -299,7 +309,8 @@ int main(int argc, char** argv) {
 			mill_array,
 			target_array,
 			//And the universal constants.
-			resolution_y, resolution_x
+			resolution_y, resolution_x,
+			cx_fixed, cy_fixed
 		);
 		
 		//And then the global parameters to optimize
@@ -365,7 +376,7 @@ int main(int argc, char** argv) {
 	std::printf(
 		"\tfx = \e[35m%f\e[36m\tfy = \e[35m%f\e[36m\t cx = \e[35m%f\e[36m\t cy = \e[35m%f\e[36m\n",
 		//fx		fy		cx		cy
-		projection[0], projection[1], projection[2], projection[3]
+		projection[0], projection[1], cx_fixed, cy_fixed
 	);
 	std::printf(
 		"\tk1 = \e[35m%f\e[36m\tk2 = \e[35m%f\e[36m\t k3 = \e[35m%f\e[36m\t p1 = \e[35m%f\e[36m\t p2 = \e[35m%f\e[39m\n",
@@ -375,8 +386,8 @@ int main(int argc, char** argv) {
 	YAML::Node output_node;
 	output_node["fx"] = projection[0];
 	output_node["fy"] = projection[1];
-	output_node["cx"] = projection[2];
-	output_node["cy"] = projection[3];
+	output_node["cx"] = cx_fixed;
+	output_node["cy"] = cy_fixed;
 	output_node["k1"] = distortion[0];
 	output_node["k2"] = distortion[1];
 	output_node["k3"] = distortion[2];

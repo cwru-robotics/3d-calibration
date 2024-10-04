@@ -126,7 +126,7 @@ int main(int argc, char** argv){
 	std::cout << R_to_SLED.matrix();
 	std::cout << "\n";
 	
-	Eigen::Affine3d L_to_R = R_to_SLED.inverse() * L_to_SLED;
+	Eigen::Affine3d L_to_R = L_to_SLED.inverse() * R_to_SLED;
 	printf("\n\n\nLEFT TO RIGHT INTEROCULAR TRANSFORM IS \n\n");
 	std::cout << L_to_R.matrix();
 	printf("\n\n");

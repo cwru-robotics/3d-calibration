@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <math.h>
 #include <unistd.h>
 
 #include <Eigen/Eigen>
@@ -80,20 +81,20 @@ public:
 		TARGET_to_POINT[1] = T(TARGET_to_POINT_translation[1]);
 		TARGET_to_POINT[2] = T(TARGET_to_POINT_translation[2]);
 	
-		/*std::cout << "TARGET TO POINT\n";
-		std::cout << TARGET_to_POINT[0] << "\n";
-		std::cout << TARGET_to_POINT[1] << "\n";
-		std::cout << TARGET_to_POINT[2] << "\n\n";*/
+		//std::cout << "TARGET TO POINT\n";
+		//std::cout << cc_utils::val(TARGET_to_POINT[0]) << "\n";
+		//std::cout << cc_utils::val(TARGET_to_POINT[1]) << "\n";
+		//std::cout << cc_utils::val(TARGET_to_POINT[2]) << "\n\n";
 		
 		//	1b: SLED_to_TARGET * TARGET_to_POINT
 		T SLED_to_POINT [3];
 		const T no_translation[3] = {T(0.0), T(0.0), T(0.0)};
-		cc_utils::transformPoint_euler(no_translation, SLED_to_TARGET_rotation, TARGET_to_POINT, SLED_to_POINT);
+		cc_utils::transformPoint_euler(no_translation, SLED_to_TARGET_rotation/*no_translation*/, TARGET_to_POINT, SLED_to_POINT);
 		
-		/*std::cout << "SLED TO POINT\n";
-		std::cout << SLED_to_POINT[0] << "\n";
-		std::cout << SLED_to_POINT[1] << "\n";
-		std::cout << SLED_to_POINT[2] << "\n\n";*/
+		//std::cout << "SLED TO POINT\n";
+		//std::cout << cc_utils::val(SLED_to_POINT[0]) << "\n";
+		//std::cout << cc_utils::val(SLED_to_POINT[1]) << "\n";
+		//std::cout << cc_utils::val(SLED_to_POINT[2]) << "\n\n";
 		
 		//	1c: MILL_to_SLED * SLED_to_TARGET * TARGET_to_POINT
 		//MILL to SLED is just a translation
@@ -162,39 +163,31 @@ int main(int argc, char** argv) {
 		printf("\e[39mInitial position file \"%s\" does not exist or contains syntax errors.\e[31m\n", argv[2]);
 		return 0;
 	}
-	double CtM_init_x, CtM_init_y, CtM_init_z, CtM_init_r, CtM_init_p, CtM_init_w;
+	double MtC_init_x, MtC_init_y, MtC_init_z, MtC_init_r, MtC_init_p, MtC_init_w;
 	double trg_init_r, trg_init_p, trg_init_w;
 	int resolution_x, resolution_y;
 	try{
 		//Camera to mill
-		double MtC_init_x = position_file["mill_to_camera_guess_x"].as<double>();
-		double MtC_init_y = position_file["mill_to_camera_guess_y"].as<double>();
-		double MtC_init_z = position_file["mill_to_camera_guess_z"].as<double>();
+		MtC_init_x = position_file["mill_to_camera_x"].as<double>();
+		MtC_init_y = position_file["mill_to_camera_y"].as<double>();
+		MtC_init_z = position_file["mill_to_camera_z"].as<double>();
 		
-		double MtC_init_r = position_file["mill_to_camera_guess_r"].as<double>();
-		double MtC_init_p = position_file["mill_to_camera_guess_p"].as<double>();
-		double MtC_init_w = position_file["mill_to_camera_guess_w"].as<double>();
-		
-		//Turn the user-friendly (and Gazebo-friendly) mill-to-camera guess into the necessary camera-to-mill format.
-		double CtM_init_x, CtM_init_y, CtM_init_z,	CtM_init_r, CtM_init_p, CtM_init_w;
-		cc_utils::invert_eul(
-			MtC_init_x, MtC_init_y, MtC_init_z,	MtC_init_r, MtC_init_p, MtC_init_w,
-			CtM_init_x, CtM_init_y, CtM_init_z,	CtM_init_r, CtM_init_p, CtM_init_w
-		);
-   		
-   		
+		MtC_init_r = position_file["mill_to_camera_r"].as<double>();
+		MtC_init_p = position_file["mill_to_camera_p"].as<double>();
+		MtC_init_w = position_file["mill_to_camera_w"].as<double>();
+	
 		//Millhead to target
-		trg_init_r = position_file["sled_to_target_guess_r"].as<double>();
-		trg_init_p = position_file["sled_to_target_guess_p"].as<double>();
-		trg_init_w = position_file["sled_to_target_guess_w"].as<double>();
+		trg_init_r = position_file["sled_to_target_r"].as<double>();
+		trg_init_p = position_file["sled_to_target_p"].as<double>();
+		trg_init_w = position_file["sled_to_target_w"].as<double>();
 		
 		
 		//Pixel values
-		resolution_x = position_file["res_x"].as<int>();
-		resolution_y = position_file["res_y"].as<int>();
+		resolution_x = position_file["resolution_u"].as<int>();
+		resolution_y = position_file["resolution_v"].as<int>();
 		
-	} catch(YAML::RepresentationException e){
-		printf("\e[39mPosition parse exception \"%s\".\e[31m\n", e.what());
+	} catch(YAML::Exception e){
+		printf("\e[39mPosition parse exception \"%s\" in %s.\e[31m\n", e.what(), argv[2]);
 		return 0;
 	}
 	printf("\nSuccessfully initialized positions from %s.\n", argv[2]);
@@ -219,7 +212,7 @@ int main(int argc, char** argv) {
 		k3_init = intrinsic_file["k3"].as<double>();
 		p1_init = intrinsic_file["p1"].as<double>();
 		p2_init = intrinsic_file["p2"].as<double>();
-	} catch(YAML::RepresentationException e){
+	} catch(YAML::Exception e){
 		printf("\e[39mIntrinsic parse exception \"%s\".\e[31m\n", e.what());
 		return 0;
 	}
@@ -284,9 +277,8 @@ int main(int argc, char** argv) {
 	
 	//Initialize the unknown values from their defaults.
 	double SLED_to_TARGET_r [3] = {cc_utils::rtod(trg_init_r), cc_utils::rtod(trg_init_p), cc_utils::rtod(trg_init_w)};
-	double CAM_to_MILL_t [3] = {CtM_init_x, CtM_init_y, CtM_init_z};
-	double CAM_to_MILL_r [3] = {cc_utils::rtod(CtM_init_r), cc_utils::rtod(CtM_init_p), cc_utils::rtod(CtM_init_w)};
-	
+	double CAM_to_MILL_t [3] = {MtC_init_x, MtC_init_y, MtC_init_z};
+	double CAM_to_MILL_r [3] = {cc_utils::rtod(MtC_init_r), cc_utils::rtod(MtC_init_p), cc_utils::rtod(MtC_init_w)};
 
 	double projection[2] = {
 		//fx		fy		cx		cy
@@ -296,7 +288,7 @@ int main(int argc, char** argv) {
 	double distortion[5] = {k1_init, k2_init, k3_init, p1_init, p2_init};
 	
 	//Set up visualization.
-	cc_utils::init_visualization(resolution_y, resolution_x, pixels, options);
+	cc_utils::init_visualization(resolution_x, resolution_y, pixels, options);
 	
 	for(int i = 0; i < n; i++){
 		//Add the perpoint constants.
@@ -336,18 +328,31 @@ int main(int argc, char** argv) {
 	ceres::Solver::Summary summary;
     	ceres::Solve(options, &problem, &summary);
     	
+
     	//Convert the camera-to-mill transform back into mill-to-camera for easy comparison
-    	double MtC_x, MtC_y, MtC_z,	MtC_r, MtC_p, MtC_w;
-	Eigen::Affine3d b = cc_utils::invert_eul(
-		CAM_to_MILL_t[0], CAM_to_MILL_t[1], CAM_to_MILL_t[2],
-		cc_utils::dtor(CAM_to_MILL_r[0]), cc_utils::dtor(CAM_to_MILL_r[1]), cc_utils::dtor(CAM_to_MILL_r[2]),
-		
-		MtC_x, MtC_y, MtC_z,	MtC_r, MtC_p, MtC_w
-	);
-    	
+	double MtC_x = CAM_to_MILL_t[0];
+	double MtC_y = CAM_to_MILL_t[1];
+	double MtC_z = CAM_to_MILL_t[2];
+	double MtC_r = cc_utils::dtor(CAM_to_MILL_r[0]);
+	double MtC_p = cc_utils::dtor(CAM_to_MILL_r[1]);
+	double MtC_w = cc_utils::dtor(CAM_to_MILL_r[2]);
+	
+	Eigen::Affine3d b;
+	b =
+		Eigen::AngleAxisd(MtC_w, Eigen::Vector3d::UnitZ()) *
+   		Eigen::AngleAxisd(MtC_p, Eigen::Vector3d::UnitY()) *
+   		Eigen::AngleAxisd(MtC_r, Eigen::Vector3d::UnitX());
+   	b.translation() = Eigen::Vector3d(MtC_x, MtC_y, MtC_z);
+	
     	//Calculate the RMS and display the values:
     	printf("\nCalibration complete.\n");
-    	printf("\e[36mRMS value is \e[35m%f px\e[36m.\n", cc_utils::rms());
+    	double rms = cc_utils::rms();
+    	printf("\e[36mRMS value is \e[35m%f px\e[36m.\n", rms);
+    	
+    	if(std::isnan(rms)){
+    		printf("Solver did not converge. Won't save results.\n");
+    		return 0;
+    	}
     	
     	std::printf("SLED to TARGET:\n");
 	std::printf(
@@ -409,6 +414,24 @@ int main(int argc, char** argv) {
 			b.matrix()(2, 0) << ", " << b.matrix()(2, 1) << ", " << b.matrix()(2, 2) << ", " << b.matrix()(2, 3) << ", " <<
 			b.matrix()(3, 0) << ", " << b.matrix()(3, 1) << ", " << b.matrix()(3, 2) << ", " << b.matrix()(3, 3) << "]\n"
 		;
+		
+		//Same format as came in:
+		fout << "mill_to_camera_x: " << MtC_x << "\n";
+		fout << "mill_to_camera_y: " << MtC_y << "\n";
+		fout << "mill_to_camera_z: " << MtC_z << "\n";
+		
+		fout << "mill_to_camera_r: " << MtC_r << "\n";
+		fout << "mill_to_camera_p: " << MtC_p << "\n";
+		fout << "mill_to_camera_w: " << MtC_w << "\n";
+		
+		
+		
+		fout << "sled_to_target_r: " << cc_utils::dtor(SLED_to_TARGET_r[0]) << "\n";
+		fout << "sled_to_target_p: " << cc_utils::dtor(SLED_to_TARGET_r[1]) << "\n";
+		fout << "sled_to_target_w: " << cc_utils::dtor(SLED_to_TARGET_r[2]) << "\n";
+		
+		fout << "resolution_u: " << resolution_x << "\n";
+		fout << "resolution_v: " << resolution_y << "\n";
 		fout.close();
 	}
 

@@ -256,12 +256,14 @@ int main(int argc, char** argv) {
 			} else{
 				cv::drawChessboardCorners(image, patternsize, centers, true);
 				cv::Point2f center;
-				for (int i_circle = 0; i_circle <= target_y; i_circle++){
-					for (int j_circle = 0; j_circle <= target_x; j_circle++) {
+				//printf("\tFound %lu corners.\n", centers.size());
+				for (int i_circle = 0; i_circle < target_x; i_circle++){
+					for (int j_circle = 0; j_circle < target_y; j_circle++) {
 						//Draw on the image
 						int n_circle = j_circle * target_x + i_circle;
 						center = centers[n_circle];
 						cv::circle( image, center, 2, cv::Scalar(0,0,255), 2);
+						//printf("\t\tMetric %f %f vs pixel %f %f\n", i_circle * target_spacing, j_circle * target_spacing, center.x, center.y);
 				
 						//Write the data.
 						//FORMAT: u, v, target_x, target_y, camera_x, camera_y, camera_z
@@ -272,6 +274,7 @@ int main(int argc, char** argv) {
 						;
 					}
 				}
+				//return 0;
 			}
 			
 		} else{

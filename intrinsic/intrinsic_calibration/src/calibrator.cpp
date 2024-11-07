@@ -401,14 +401,36 @@ int main(int argc, char** argv) {
 	std::ofstream e_out;
 	e_out.open(output);
 	e_out << output_node;
+	
+	e_out << "\nimage_width: " << resolution_x << "\n";
+	e_out << "image_height: " << resolution_y << "\n";
+	e_out << "camera_name: endo_cam_l\n";
+	e_out << "camera_matrix:\n";
+	e_out << "  rows: 3\n";
+	e_out << "  cols: 3\n";
+	e_out << "  data: [" << projection[0] << ", 0.0, " << cx_fixed << ", 0.0, " << projection[1] << ", " << cy_fixed << ", 0.0, 0.0, 1.0]\n";
+	e_out << "distortion_model: plumb_bob\n";
+	e_out << "distortion_coefficients:\n";
+	e_out << "  rows: 1\n";
+	e_out << "  cols: 5\n";
+	e_out << "  data: [" << distortion[0] << ", " << distortion[1] << ", " << distortion[3] << ", " << distortion[4] << ", " << distortion[2] << "]\n";
+	e_out << "rectification_matrix:\n";
+	e_out << "  rows: 3\n";
+	e_out << "  cols: 3\n";
+	e_out << "  data: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\n";
+	e_out << "projection_matrix:\n";
+	e_out << "  rows: 3\n";
+	e_out << "  cols: 4\n";
+	e_out << "  data: [" << projection[0] << ", 0.0, " << cx_fixed << ", 0.0, 0.0, " << projection[1] << ", " << cy_fixed << ", 0.0, 0.0, 0.0, 1.0, 0.0]\n";
+	
 	e_out.close();
 	printf("\nSaved results to %s.\n\n\n", output);
 	
 	if(position != NULL){
-		std::ofstream fout = std::ofstream(position);
-		fout << "translation: [" << MtC_x << ", " << MtC_y << ", " << MtC_z << "]\n";
-		fout << "rpy: [" << MtC_r << ", " << MtC_p << ", " << MtC_w << "]\n";
-		fout << "matrix: [" <<
+		std::ofstream e_out = std::ofstream(position);
+		e_out << "translation: [" << MtC_x << ", " << MtC_y << ", " << MtC_z << "]\n";
+		e_out << "rpy: [" << MtC_r << ", " << MtC_p << ", " << MtC_w << "]\n";
+		e_out << "matrix: [" <<
 			b.matrix()(0, 0) << ", " << b.matrix()(0, 1) << ", " << b.matrix()(0, 2) << ", " << b.matrix()(0, 3) << ", " <<
 			b.matrix()(1, 0) << ", " << b.matrix()(1, 1) << ", " << b.matrix()(1, 2) << ", " << b.matrix()(1, 3) << ", " <<
 			b.matrix()(2, 0) << ", " << b.matrix()(2, 1) << ", " << b.matrix()(2, 2) << ", " << b.matrix()(2, 3) << ", " <<
@@ -416,23 +438,23 @@ int main(int argc, char** argv) {
 		;
 		
 		//Same format as came in:
-		fout << "mill_to_camera_x: " << MtC_x << "\n";
-		fout << "mill_to_camera_y: " << MtC_y << "\n";
-		fout << "mill_to_camera_z: " << MtC_z << "\n";
+		e_out << "mill_to_camera_x: " << MtC_x << "\n";
+		e_out << "mill_to_camera_y: " << MtC_y << "\n";
+		e_out << "mill_to_camera_z: " << MtC_z << "\n";
 		
-		fout << "mill_to_camera_r: " << MtC_r << "\n";
-		fout << "mill_to_camera_p: " << MtC_p << "\n";
-		fout << "mill_to_camera_w: " << MtC_w << "\n";
+		e_out << "mill_to_camera_r: " << MtC_r << "\n";
+		e_out << "mill_to_camera_p: " << MtC_p << "\n";
+		e_out << "mill_to_camera_w: " << MtC_w << "\n";
 		
 		
 		
-		fout << "sled_to_target_r: " << cc_utils::dtor(SLED_to_TARGET_r[0]) << "\n";
-		fout << "sled_to_target_p: " << cc_utils::dtor(SLED_to_TARGET_r[1]) << "\n";
-		fout << "sled_to_target_w: " << cc_utils::dtor(SLED_to_TARGET_r[2]) << "\n";
+		e_out << "sled_to_target_r: " << cc_utils::dtor(SLED_to_TARGET_r[0]) << "\n";
+		e_out << "sled_to_target_p: " << cc_utils::dtor(SLED_to_TARGET_r[1]) << "\n";
+		e_out << "sled_to_target_w: " << cc_utils::dtor(SLED_to_TARGET_r[2]) << "\n";
 		
-		fout << "resolution_u: " << resolution_x << "\n";
-		fout << "resolution_v: " << resolution_y << "\n";
-		fout.close();
+		e_out << "resolution_u: " << resolution_x << "\n";
+		e_out << "resolution_v: " << resolution_y << "\n";
+		e_out.close();
 	}
 
 	return 0;

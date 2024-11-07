@@ -3,9 +3,19 @@
 	<arg name="POS_ORIGIN" doc="Path to positional data for the origin camera." />
 	<arg name="INT_OFFSET" doc="Path to intrinsic data for the offset camera." />
 	<arg name="POS_OFFSET" doc="Path to positional data for the offset camera." />
-	<arg name="OUTPUT_ORIGIN" doc="Path to dump finished intrinsic data for the origin camera." />
-	<arg name="OUTPUT_OFFSET" doc="Path to dump finished intrinsic data for the offset camera." />
+	
 	<arg name="OUTPUT_INTEROCULAR" doc="Path to dump finished positional data." />
+	
+	<arg
+		name="data_l"
+		default="$(find intrinsic_acquisition)/data/intrinsic_detections.csv"
+		doc="CSV file of point data."
+	/>
+	<arg
+		name="data_r"
+		default="$(find intrinsic_acquisition)/data/intrinsic_detections.csv"
+		doc="CSV file of point data."
+	/>
 
-	<node pkg="iod_calc" type="interocular_calculator" name="interocular" args="$(arg INT_ORIGIN) $(arg POS_ORIGIN) $(arg INT_OFFSET) $(arg POS_OFFSET) $(arg OUTPUT_ORIGIN) $(arg OUTPUT_OFFSET) $(arg OUTPUT_INTEROCULAR)" output="screen" required="true"/>
+	<node pkg="iod_calc" type="interocular_calculator" name="interocular" args="$(arg data_l) $(arg POS_ORIGIN) $(arg INT_ORIGIN) $(arg data_r) $(arg POS_OFFSET) $(arg INT_OFFSET) $(arg OUTPUT_INTEROCULAR)" output="screen" required="true"/>
 </launch>

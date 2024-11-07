@@ -3,9 +3,11 @@ project(iod_calc)
 
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(Ceres REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
 	roscpp
+	cc_utils
 )
 
 include_directories(${catkin_INCLUDE_DIRS})
@@ -17,5 +19,6 @@ add_executable(interocular_calculator src/interocular.cpp)
 target_link_libraries(interocular_calculator
 	${OpenCV_LIBS}
 	${catkin_LIBRARIES}
+	${CERES_LIBRARIES}
 	yaml-cpp
 )

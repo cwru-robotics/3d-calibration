@@ -224,6 +224,8 @@ public:
 		std::cout << CAM_to_POINT[1] << "\n";
 		std::cout << CAM_to_POINT[2] << "\n\n";*/
 		
+		
+		
 		T R_to_POINT [3];
 		cc_utils::transformPoint_euler(L_to_R_translation, L_to_R_rotation, CAM_to_POINT, R_to_POINT);
 		
@@ -619,64 +621,39 @@ int main(int argc, char** argv) {
    		Eigen::AngleAxisd(LtR_r, Eigen::Vector3d::UnitX());
    	c.translation() = Eigen::Vector3d(LtR_x, LtR_y, LtR_z);
    	
-   	std::printf("\tx = \e[35m%f\e[36m\ty = \e[35m%f\e[36m\tz = \e[35m%f\e[36m\n", LtR_x, LtR_y, LtR_z);
-	std::printf("\tr = \e[35m%f\e[36m\tp = \e[35m%f\e[36m\tw = \e[35m%f\n\n", LtR_r, LtR_p, LtR_w);
-	std::printf("\t%f\t%f\t%f\t%f\n", c.matrix()(0, 0), c.matrix()(0, 1), c.matrix()(0, 2), c.matrix()(0, 3));
-	std::printf("\t%f\t%f\t%f\t%f\n", c.matrix()(1, 0), c.matrix()(1, 1), c.matrix()(1, 2), c.matrix()(1, 3));
-	std::printf("\t%f\t%f\t%f\t%f\n", c.matrix()(2, 0), c.matrix()(2, 1), c.matrix()(2, 2), c.matrix()(2, 3));
-	std::printf("\t%f\t%f\t%f\t%f\e[36m\n", c.matrix()(3, 0), c.matrix()(3, 1), c.matrix()(3, 2), c.matrix()(3, 3));
+   	Eigen::Affine3d d = c.inverse();
+   	
+   	double RtL_x = d.translation()[0];
+   	double RtL_y = d.translation()[1];
+   	double RtL_z = d.translation()[2];
+   	
+   	Eigen::Vector3d RtL_rotation = d.linear().eulerAngles(2, 1, 0);
+   	
+   	std::printf("\tx = \e[35m%f\e[36m\ty = \e[35m%f\e[36m\tz = \e[35m%f\e[36m\n", RtL_x, RtL_y, RtL_z);
+	std::printf("\tr = \e[35m%f\e[36m\tp = \e[35m%f\e[36m\tw = \e[35m%f\n\n", RtL_rotation[0], RtL_rotation[1], RtL_rotation[2]);
+	std::printf("\t%f\t%f\t%f\t%f\n", d.matrix()(0, 0), d.matrix()(0, 1), d.matrix()(0, 2), d.matrix()(0, 3));
+	std::printf("\t%f\t%f\t%f\t%f\n", d.matrix()(1, 0), d.matrix()(1, 1), d.matrix()(1, 2), d.matrix()(1, 3));
+	std::printf("\t%f\t%f\t%f\t%f\n", d.matrix()(2, 0), d.matrix()(2, 1), d.matrix()(2, 2), d.matrix()(2, 3));
+	std::printf("\t%f\t%f\t%f\t%f\e[36m\n", d.matrix()(3, 0), d.matrix()(3, 1), d.matrix()(3, 2), d.matrix()(3, 3));
 	
 	printf("In long form that is %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",
-		c.matrix()(0, 0), c.matrix()(0, 1), c.matrix()(0, 2), c.matrix()(0, 3),
-		c.matrix()(1, 0), c.matrix()(1, 1), c.matrix()(1, 2), c.matrix()(1, 3),
-		c.matrix()(2, 0), c.matrix()(2, 1), c.matrix()(2, 2), c.matrix()(2, 3),
-		c.matrix()(3, 0), c.matrix()(3, 1), c.matrix()(3, 2), c.matrix()(3, 3)
+		d.matrix()(0, 0), d.matrix()(0, 1), d.matrix()(0, 2), d.matrix()(0, 3),
+		d.matrix()(1, 0), d.matrix()(1, 1), d.matrix()(1, 2), d.matrix()(1, 3),
+		d.matrix()(2, 0), d.matrix()(2, 1), d.matrix()(2, 2), d.matrix()(2, 3),
+		d.matrix()(3, 0), d.matrix()(3, 1), d.matrix()(3, 2), d.matrix()(3, 3)
 	);
 	
 	std::ofstream fout = std::ofstream(argv[7]);
-	fout << "matrix: [" << mat_to_linear(c.matrix()) << "]\n";
-	fout << "ros_x: " << c.translation().x() << "\n";
-	fout << "ros_y: " << c.translation().y() << "\n";
-	fout << "ros_z: " << c.translation().z() << "\n";
-	fout << "ros_r: " << LtR_r << "\n";
-	fout << "ros_p: " << LtR_p << "\n";
-	fout << "ros_w: " << LtR_w << "\n";
+	fout << "matrix: [" << mat_to_linear(d.matrix()) << "]\n";
+	fout << "ros_x: " << RtL_x << "\n";
+	fout << "ros_y: " << RtL_y << "\n";
+	fout << "ros_z: " << RtL_z << "\n";
+	fout << "ros_r: " << RtL_rotation[0] << "\n";
+	fout << "ros_p: " << RtL_rotation[1] << "\n";
+	fout << "ros_w: " << RtL_rotation[2] << "\n";
 	fout.close();
 
 	printf("Successfully wrote interocular data to %s\n", argv[7]);
-	
-	/*
-	
-	if(position != NULL){
-		std::ofstream fout = std::ofstream(position);
-		fout << "translation: [" << MtC_x << ", " << MtC_y << ", " << MtC_z << "]\n";
-		fout << "rpy: [" << MtC_r << ", " << MtC_p << ", " << MtC_w << "]\n";
-		fout << "matrix: [" <<
-			b.matrix()(0, 0) << ", " << b.matrix()(0, 1) << ", " << b.matrix()(0, 2) << ", " << b.matrix()(0, 3) << ", " <<
-			b.matrix()(1, 0) << ", " << b.matrix()(1, 1) << ", " << b.matrix()(1, 2) << ", " << b.matrix()(1, 3) << ", " <<
-			b.matrix()(2, 0) << ", " << b.matrix()(2, 1) << ", " << b.matrix()(2, 2) << ", " << b.matrix()(2, 3) << ", " <<
-			b.matrix()(3, 0) << ", " << b.matrix()(3, 1) << ", " << b.matrix()(3, 2) << ", " << b.matrix()(3, 3) << "]\n"
-		;
-		
-		//Same format as came in:
-		fout << "mill_to_camera_x: " << MtC_x << "\n";
-		fout << "mill_to_camera_y: " << MtC_y << "\n";
-		fout << "mill_to_camera_z: " << MtC_z << "\n";
-		
-		fout << "mill_to_camera_r: " << MtC_r << "\n";
-		fout << "mill_to_camera_p: " << MtC_p << "\n";
-		fout << "mill_to_camera_w: " << MtC_w << "\n";
-		
-		
-		
-		fout << "sled_to_target_r: " << cc_utils::dtor(SLED_to_TARGET_r[0]) << "\n";
-		fout << "sled_to_target_p: " << cc_utils::dtor(SLED_to_TARGET_r[1]) << "\n";
-		fout << "sled_to_target_w: " << cc_utils::dtor(SLED_to_TARGET_r[2]) << "\n";
-		
-		fout << "resolution_u: " << resolution_x << "\n";
-		fout << "resolution_v: " << resolution_y << "\n";
-		fout.close();
-	}*/
 
 	return 0;
 }

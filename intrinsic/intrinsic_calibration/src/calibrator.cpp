@@ -161,13 +161,13 @@ int main(int argc, char** argv) {
 	int resolution_x, resolution_y;
 	try{
 		//Camera to mill
-		double MtC_init_x = position_file["mill_to_camera_guess_x"].as<double>();
-		double MtC_init_y = position_file["mill_to_camera_guess_y"].as<double>();
-		double MtC_init_z = position_file["mill_to_camera_guess_z"].as<double>();
+		double MtC_init_x = position_file["mill_to_camera_x"].as<double>();
+		double MtC_init_y = position_file["mill_to_camera_y"].as<double>();
+		double MtC_init_z = position_file["mill_to_camera_z"].as<double>();
 		
-		double MtC_init_r = position_file["mill_to_camera_guess_r"].as<double>();
-		double MtC_init_p = position_file["mill_to_camera_guess_p"].as<double>();
-		double MtC_init_w = position_file["mill_to_camera_guess_w"].as<double>();
+		double MtC_init_r = position_file["mill_to_camera_r"].as<double>();
+		double MtC_init_p = position_file["mill_to_camera_p"].as<double>();
+		double MtC_init_w = position_file["mill_to_camera_w"].as<double>();
 		
 		//Turn the user-friendly (and Gazebo-friendly) mill-to-camera guess into the necessary camera-to-mill format.
 		double CtM_init_x, CtM_init_y, CtM_init_z,	CtM_init_r, CtM_init_p, CtM_init_w;
@@ -178,17 +178,17 @@ int main(int argc, char** argv) {
    		
    		
 		//Millhead to target
-		trg_init_r = position_file["sled_to_target_guess_r"].as<double>();
-		trg_init_p = position_file["sled_to_target_guess_p"].as<double>();
-		trg_init_w = position_file["sled_to_target_guess_w"].as<double>();
+		trg_init_r = position_file["sled_to_target_r"].as<double>();
+		trg_init_p = position_file["sled_to_target_p"].as<double>();
+		trg_init_w = position_file["sled_to_target_w"].as<double>();
 		
 		
 		//Pixel values
-		resolution_x = position_file["res_x"].as<int>();
-		resolution_y = position_file["res_y"].as<int>();
+		resolution_x = position_file["resolution_u"].as<int>();
+		resolution_y = position_file["resolution_v"].as<int>();
 		
 	} catch(YAML::RepresentationException e){
-		printf("\e[39mPosition parse exception \"%s\".\e[31m\n", e.what());
+		printf("\e[39mPosition parse exception \"%s\" in %s.\e[31m\n", e.what(), argv[2]);
 		return 0;
 	}
 	printf("\nSuccessfully initialized positions from %s.\n", argv[2]);

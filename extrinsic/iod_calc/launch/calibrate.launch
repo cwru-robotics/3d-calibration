@@ -3,9 +3,7 @@
 	<arg name="POS_ORIGIN" doc="Path to positional data for the origin camera." />
 	<arg name="INT_OFFSET" doc="Path to intrinsic data for the offset camera." />
 	<arg name="POS_OFFSET" doc="Path to positional data for the offset camera." />
-	<arg name="OUTPUT_ORIGIN" doc="Path to dump finished intrinsic data for the origin camera." />
-	<arg name="OUTPUT_OFFSET" doc="Path to dump finished intrinsic data for the offset camera." />
 	<arg name="OUTPUT_INTEROCULAR" doc="Path to dump finished positional data." />
 
-	<node pkg="iod_calc" type="interocular_calculator" name="interocular" args="$(arg INT_ORIGIN) $(arg POS_ORIGIN) $(arg INT_OFFSET) $(arg POS_OFFSET) $(arg OUTPUT_ORIGIN) $(arg OUTPUT_OFFSET) $(arg OUTPUT_INTEROCULAR)" output="screen" required="true"/>
+	<node pkg="iod_calc" type="interocular_calculator" name="interocular" args="$(arg INT_ORIGIN) $(arg POS_ORIGIN) $(arg INT_OFFSET) $(arg POS_OFFSET) $(arg OUTPUT_INTEROCULAR)" output="screen" required="true"/>
 </launch>

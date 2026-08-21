@@ -235,8 +235,8 @@ int main(int argc, char** argv) {
 			if(circles){
 				cv::Point2f center;
 				//printf("%lu\n", centers.size());
-				for (int i_circle = 0; i_circle < target_x; i_circle++){
-					for (int j_circle = 0; j_circle < target_y; j_circle++) {
+				for (int i_circle = 0; i_circle < target_y; i_circle++){
+					for (int j_circle = 0; j_circle < target_x; j_circle++) {
 						//Draw on the image
 						int n_circle = j_circle*target_x + i_circle;
 						//printf("\t(%d, %d): %d\n", i_circle, j_circle, n_circle);
@@ -255,11 +255,17 @@ int main(int argc, char** argv) {
 //				imwrite(vec_of_image_names[i_image] + "_red_cirlces.png", image);
 			} else{
 				cv::drawChessboardCorners(image, patternsize, centers, true);
+				std::string imname = vec_of_image_names[i_image];
+				imname = imname.substr(imname.find_last_of("\\/") + 1);
+				imname = folder[53] + imname;
+				//printf("%s\n", ("/home/tes77/dets/" + imname).c_str());
+				//cv::imwrite("/home/tes77/dets/" + imname, image);
 				cv::Point2f center;
-				for (int i_circle = 0; i_circle <= target_y; i_circle++){
-					for (int j_circle = 0; j_circle <= target_x; j_circle++) {
+				for (int j_circle = 0; j_circle < target_y; j_circle++) {
+					for (int i_circle = 0; i_circle < target_x; i_circle++){
 						//Draw on the image
 						int n_circle = j_circle * target_x + i_circle;
+						//printf("\t(%d, %d): %d of %lu\n", i_circle, j_circle, n_circle, centers.size());
 						center = centers[n_circle];
 						cv::circle( image, center, 2, cv::Scalar(0,0,255), 2);
 				

@@ -112,11 +112,11 @@ int main(int argc, char ** argv){
 		return 0;
 	}
 	double max_x = data_file["max_sled_x"].as<double>();
-	if(!data_file["inc_sled_x"]){
-		ROS_ERROR("TDF \"%s\" is missing its inc_sled_x field.", argv[2]);
+	if(!data_file["num_sled_x"]){
+		ROS_ERROR("TDF \"%s\" is missing its num_sled_x field.", argv[2]);
 		return 0;
 	}
-	double inc_x = data_file["inc_sled_x"].as<double>();
+	int num_x = data_file["num_sled_x"].as<int>();
 	
 	if(!data_file["min_sled_y"]){
 		ROS_ERROR("TDF \"%s\" is missing its min_sled_y field.", argv[2]);
@@ -128,11 +128,11 @@ int main(int argc, char ** argv){
 		return 0;
 	}
 	double max_y = data_file["max_sled_y"].as<double>();
-	if(!data_file["inc_sled_y"]){
-		ROS_ERROR("TDF \"%s\" is missing its inc_sled_y field.", argv[2]);
+	if(!data_file["num_sled_y"]){
+		ROS_ERROR("TDF \"%s\" is missing its num_sled_y field.", argv[2]);
 		return 0;
 	}
-	double inc_y = data_file["inc_sled_y"].as<double>();
+	int num_y = data_file["num_sled_y"].as<int>();
 	
 	if(!data_file["min_sled_z"]){
 		ROS_ERROR("TDF \"%s\" is missing its min_sled_z field.", argv[2]);
@@ -144,11 +144,11 @@ int main(int argc, char ** argv){
 		return 0;
 	}
 	double max_z = data_file["max_sled_z"].as<double>();
-	if(!data_file["inc_sled_z"]){
-		ROS_ERROR("TDF \"%s\" is missing its inc_sled_z field.", argv[2]);
+	if(!data_file["num_sled_z"]){
+		ROS_ERROR("TDF \"%s\" is missing its num_sled_z field.", argv[2]);
 		return 0;
 	}
-	double inc_z = data_file["inc_sled_z"].as<double>();
+	int num_z = data_file["num_sled_z"].as<int>();
 	
 	if(min_x > max_x){
 		ROS_ERROR("min_x > max_x");
@@ -163,22 +163,18 @@ int main(int argc, char ** argv){
 		return 0;
 	}
 	
-	if(inc_x <= 0.0){
+	if(num_x < 2){
 		ROS_ERROR("X increment should be positive.");
 		return 0;
 	}
-	if(inc_y <= 0.0){
+	if(num_y < 2){
 		ROS_ERROR("Y increment should be positive.");
 		return 0;
 	}
-	if(inc_z <= 0.0){
+	if(num_z < 2){
 		ROS_ERROR("Z increment should be positive.");
 		return 0;
 	}
-	
-	max_x -= fmod(max_x - min_x, inc_x);
-	max_y -= fmod(max_y - min_y, inc_y);
-	max_z -= fmod(max_z - min_z, inc_z);
 	
 	ROS_INFO("Successfully initialized test from TDF \"%s\".", argv[2]);
 	
@@ -200,6 +196,8 @@ int main(int argc, char ** argv){
 		printf("\t%s\t:\t", name.c_str());
 		ros::topic::waitForMessage<sensor_msgs::Image>(name, nh);
 		//Can't write filenames with the slashes ROS uses to describe topics, so replace them with spaces (a character that cannot exist in a ROS topic):
+		
+						name = name.substr(1);
 		std::string topic_file = replaceChar(name, '/', ' ');
 		boost::filesystem::create_directory(master_path / boost::filesystem::path(topic_file));
 		boost::filesystem::copy(argv[2], master_path / boost::filesystem::path(topic_file) / boost::filesystem::path(filename));
@@ -211,9 +209,9 @@ int main(int argc, char ** argv){
 	//expanding cubical shells.
 	int i = 0;
 	int total = 0;
-	for(double x = min_x; x <= max_x; x += inc_x){
-		for(double y = min_y; y <= max_y; y += inc_y){
-			for(double z = min_z; z <= max_z; z += inc_z){
+	for(double x = 0; x < num_x; x ++){
+		for(double y = 0; y < num_y; y ++){
+			for(double z = 0; z < num_z; z ++){
 				total ++;
 			}
 		}
@@ -221,9 +219,13 @@ int main(int argc, char ** argv){
 	
 	printf("Will acquire %d images.\n", total);
 	
-	for(double x = min_x; x <= max_x; x += inc_x){
-		for(double y = min_y; y <= max_y; y += inc_y){
-			for(double z = min_z; z <= max_z; z += inc_z){
+	for(double zn = 0; zn < num_z; zn ++){
+		for(double xn = 0; xn < num_x; xn ++){
+			for(double yn = 0; yn < num_y; yn ++){
+			
+				double x = min_x + xn * ((max_x - min_x )/(num_x-1));
+				double y = min_y + yn * ((max_y - min_y )/(num_y-1));
+				double z = min_z + zn * ((max_z - min_z )/(num_z-1));
 				
 				printf("\n%f%%: Move sled to x=%f y=%f z=%f and then press s to skip or other to acquire: ", (i / (double)total) * 100.0, x, y, z);
 				
@@ -250,6 +252,8 @@ int main(int argc, char ** argv){
 							ROS_ERROR("Could not convert from encoding to 'bgr8'.");
 							continue;
 						}
+						
+						name = name.substr(1);
 						
 						std::string x_code = replaceChar(std::to_string(x), '.', 'p');
 						std::string y_code = replaceChar(std::to_string(y), '.', 'p');

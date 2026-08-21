@@ -66,7 +66,7 @@ public:
 		T* residual
 	) const {
 		//1: Transform target points into camera frame
-		//	CAM_to_POINT = CAM_to_BASE * BASE_to_TIP * TIP_to_TARGET * TARGET_to_POINT
+		//	CAM_to_POINT = CAM_to_MILLBASE * MILLBASE_to_MILLTIP * MILLTIP_to_TARGET * TARGET_to_POINT
 	
 		//	1a: TARGET_to_POINT
 		T TARGET_to_POINT [3];
@@ -74,37 +74,54 @@ public:
 		TARGET_to_POINT[1] = T(TARGET_to_POINT_translation[1]);
 		TARGET_to_POINT[2] = T(TARGET_to_POINT_translation[2]);
 	
-		/*std::cout << "TARGET TO POINT\n";
+		/*std::cout << "TARGET TO POINT	(Perpoint)\n";
 		std::cout << TARGET_to_POINT[0] << "\n";
 		std::cout << TARGET_to_POINT[1] << "\n";
-		std::cout << TARGET_to_POINT[2] << "\n\n";*/
+		std::cout << TARGET_to_POINT[2] << "\n\n";
 		
-		//	1b: SLED_to_TARGET * TARGET_to_POINT
-		T SLED_to_POINT [3];
+		//	1b: MILLTIP_to_TARGET * TARGET_to_POINT
+		
+		
+		std::cout << "MILLTIP to TARGET ORIGIN 	(Solving)\n";
+		std::cout << SLED_to_TARGET_rotation[0] << "\n";
+		std::cout << SLED_to_TARGET_rotation[1] << "\n";
+		std::cout << SLED_to_TARGET_rotation[2] << "\n\n";*/
+		
+		T MILLTIP_to_POINT [3];
 		const T no_translation[3] = {T(0.0), T(0.0), T(0.0)};
-		cc_utils::transformPoint_euler(no_translation, SLED_to_TARGET_rotation, TARGET_to_POINT, SLED_to_POINT);
+		cc_utils::transformPoint_euler(no_translation, SLED_to_TARGET_rotation, TARGET_to_POINT, MILLTIP_to_POINT);
 		
-		/*std::cout << "SLED TO POINT\n";
-		std::cout << SLED_to_POINT[0] << "\n";
-		std::cout << SLED_to_POINT[1] << "\n";
-		std::cout << SLED_to_POINT[2] << "\n\n";*/
+		/*std::cout << "MILLTIP TO POINT	(Perpoint, Solving, Calculated)\n";
+		std::cout << MILLTIP_to_POINT[0] << "\n";
+		std::cout << MILLTIP_to_POINT[1] << "\n";
+		std::cout << MILLTIP_to_POINT[2] << "\n\n";
 		
 		//	1c: MILL_to_SLED * SLED_to_TARGET * TARGET_to_POINT
 		//MILL to SLED is just a translation
-		T MILL_to_POINT [3] = {
-			T(MILL_to_SLED_translation[0] + SLED_to_POINT[0]),
-			T(MILL_to_SLED_translation[1] + SLED_to_POINT[1]),
-			T(MILL_to_SLED_translation[2] + SLED_to_POINT[2])
+		
+		std::cout << "MILLBASE TO MILLTIP	(Stated)\n";
+		std::cout << MILL_to_SLED_translation[0] << "\n";
+		std::cout << MILL_to_SLED_translation[1] << "\n";
+		std::cout << MILL_to_SLED_translation[2] << "\n\n";*/
+		
+		T MILLBASE_to_POINT [3] = {
+			T(MILL_to_SLED_translation[0] + MILLTIP_to_POINT[0]),
+			T(MILL_to_SLED_translation[1] + MILLTIP_to_POINT[1]),
+			T(MILL_to_SLED_translation[2] + MILLTIP_to_POINT[2])
 		};
 		
-		/*std::cout << "MILL TO POINT\n";
-		std::cout << MILL_to_POINT[0] << "\n";
-		std::cout << MILL_to_POINT[1] << "\n";
-		std::cout << MILL_to_POINT[2] << "\n\n";*/
+		/*std::cout << "MILLBASE TO POINT\n";
+		std::cout << MILLBASE_to_POINT[0] << "\n";
+		std::cout << MILLBASE_to_POINT[1] << "\n";
+		std::cout << MILLBASE_to_POINT[2] << "\n\n";
 		
+		std::cout << "CAM TO MILLBASE (Solving)\n";
+		std::cout << CAM_to_MILL_translation[0] << "\n";
+		std::cout << CAM_to_MILL_translation[1] << "\n";
+		std::cout << CAM_to_MILL_translation[2] << "\n\n";*/
 		//	1d: CAM_to_MILL * MILL_to_SLED * SLED_to_TARGET * TARGET_to_POINT
 		T CAM_to_POINT [3];
-		cc_utils::transformPoint_euler(CAM_to_MILL_translation, CAM_to_MILL_rotation, MILL_to_POINT, CAM_to_POINT);
+		cc_utils::transformPoint_euler(CAM_to_MILL_translation, CAM_to_MILL_rotation, MILLBASE_to_POINT, CAM_to_POINT);
 		
 		/*std::cout << "CAM TO POINT\n";
 		std::cout << CAM_to_POINT[0] << "\n";
@@ -124,6 +141,7 @@ public:
 			u, v
 		);
 		
+		//printf("Proj u, v: (%f, %f)\n", cc_utils::val(u), cc_utils::val(v));
 		//printf("Real u, v: (%f, %f)\n", image_pixels[0], image_pixels[1]);
 		
 		cc_utils::add_to_visualization(cc_utils::val(u), cc_utils::val(v), image_pixels[0], image_pixels[1]);
@@ -133,14 +151,16 @@ public:
 		residual[0] = u - T(image_pixels[0]);
 		residual[1] = v - T(image_pixels[1]);
 		
+		//exit(0);
+		
 		return true;
 	}
 };
 
 int main(int argc, char** argv) {
-
+	printf("Args are\n");
 	for(int i = 0; i < argc; i++){
-		printf("%s\n", argv[i]);
+		printf("\t%s\n", argv[i]);
 	}
 
 	if(argc < 5){
@@ -161,21 +181,13 @@ int main(int argc, char** argv) {
 	int resolution_x, resolution_y;
 	try{
 		//Camera to mill
-		double MtC_init_x = position_file["mill_to_camera_x"].as<double>();
-		double MtC_init_y = position_file["mill_to_camera_y"].as<double>();
-		double MtC_init_z = position_file["mill_to_camera_z"].as<double>();
+		CtM_init_x = position_file["camera_to_milltip_at_rest_x"].as<double>();
+		CtM_init_y = position_file["camera_to_milltip_at_rest_y"].as<double>();
+		CtM_init_z = position_file["camera_to_milltip_at_rest_z"].as<double>();
 		
-		double MtC_init_r = position_file["mill_to_camera_r"].as<double>();
-		double MtC_init_p = position_file["mill_to_camera_p"].as<double>();
-		double MtC_init_w = position_file["mill_to_camera_w"].as<double>();
-		
-		//Turn the user-friendly (and Gazebo-friendly) mill-to-camera guess into the necessary camera-to-mill format.
-		double CtM_init_x, CtM_init_y, CtM_init_z,	CtM_init_r, CtM_init_p, CtM_init_w;
-		cc_utils::invert_eul(
-			MtC_init_x, MtC_init_y, MtC_init_z,	MtC_init_r, MtC_init_p, MtC_init_w,
-			CtM_init_x, CtM_init_y, CtM_init_z,	CtM_init_r, CtM_init_p, CtM_init_w
-		);
-   		
+		CtM_init_r = position_file["mill_to_camera_r"].as<double>();
+		CtM_init_p = position_file["mill_to_camera_p"].as<double>();
+		CtM_init_w = position_file["mill_to_camera_w"].as<double>();
    		
 		//Millhead to target
 		trg_init_r = position_file["sled_to_target_r"].as<double>();
@@ -184,8 +196,8 @@ int main(int argc, char** argv) {
 		
 		
 		//Pixel values
-		resolution_x = position_file["resolution_u"].as<int>();
-		resolution_y = position_file["resolution_v"].as<int>();
+		resolution_x = position_file["image_height"].as<int>();
+		resolution_y = position_file["image_width"].as<int>();
 		
 	} catch(YAML::RepresentationException e){
 		printf("\e[39mPosition parse exception \"%s\" in %s.\e[31m\n", e.what(), argv[2]);
@@ -203,16 +215,17 @@ int main(int argc, char** argv) {
 	double fx_init, fy_init, cx_init, cy_init;
 	double k1_init, k2_init, k3_init, p1_init, p2_init;
 	try{
-		fx_init = intrinsic_file["fx"].as<double>();
-		fy_init = intrinsic_file["fy"].as<double>();
-		cx_init = intrinsic_file["cx"].as<double>();
-		cy_init = intrinsic_file["cy"].as<double>();
+		fx_init = intrinsic_file["camera_matrix"]["data"][0].as<double>();
+		fy_init = intrinsic_file["camera_matrix"]["data"][4].as<double>();
+		cx_init = intrinsic_file["camera_matrix"]["data"][2].as<double>();
+		cy_init = intrinsic_file["camera_matrix"]["data"][5].as<double>();
 		
-		k1_init = intrinsic_file["k1"].as<double>();
-		k2_init = intrinsic_file["k2"].as<double>();
-		k3_init = intrinsic_file["k3"].as<double>();
-		p1_init = intrinsic_file["p1"].as<double>();
-		p2_init = intrinsic_file["p2"].as<double>();
+		k1_init = intrinsic_file["distortion_coefficients"]["data"][0].as<double>();
+		k2_init = intrinsic_file["distortion_coefficients"]["data"][1].as<double>();
+		k3_init = intrinsic_file["distortion_coefficients"]["data"][4].as<double>();
+		p1_init = intrinsic_file["distortion_coefficients"]["data"][2].as<double>();
+		p2_init = intrinsic_file["distortion_coefficients"]["data"][3].as<double>();
+		
 	} catch(YAML::RepresentationException e){
 		printf("\e[39mIntrinsic parse exception \"%s\".\e[31m\n", e.what());
 		return 0;
@@ -277,6 +290,7 @@ int main(int argc, char** argv) {
 	double CAM_to_MILL_t [3] = {CtM_init_x, CtM_init_y, CtM_init_z};
 	double CAM_to_MILL_r [3] = {cc_utils::rtod(CtM_init_r), cc_utils::rtod(CtM_init_p), cc_utils::rtod(CtM_init_w)};
 	
+	
 
 	double projection[4] = {
 		//fx		fy		cx		cy
@@ -293,6 +307,13 @@ int main(int argc, char** argv) {
 		double pixels_array[2] = {pixels[i].x(), pixels[i].y()};
 		double mill_array[3] = {mill_coordinates[i].x(), mill_coordinates[i].y(), mill_coordinates[i].z()};
 		double target_array[3] = {target_coordinates[i].x(), target_coordinates[i].y(), 0};
+		
+		//Pixel pixel mill mill mill target target target
+		/*printf("%f, %f, %f, %f, %f, %f, %f, %f\n",
+		pixels_array[0], pixels_array[1],
+		mill_array[0], mill_array[1], mill_array[2],
+		target_array[0], target_array[1], target_array[2]
+		);*/
 		
 		ceres::CostFunction *cost_function = CalibrationEntry::Create(
 			pixels_array,
@@ -372,6 +393,17 @@ int main(int argc, char** argv) {
 		distortion[0], distortion[1], distortion[2], distortion[3], distortion[4]
 	);
 	
+	
+	double fx = projection[0];
+	double fy = projection[1];
+	double cx = projection[2];
+	double cy = projection[3];
+	double k1 = distortion[0];
+	double k2 = distortion[1];
+	double k3 = distortion[2];
+	double p1 = distortion[3];
+	double p2 = distortion[4];
+	
 	YAML::Node output_node;
 	output_node["fx"] = projection[0];
 	output_node["fy"] = projection[1];
@@ -384,8 +416,22 @@ int main(int argc, char** argv) {
 	output_node["p2"] = distortion[4];
 	std::ofstream e_out;
 	e_out.open(output);
-	e_out << output_node;
+	e_out << output_node << "\n";
+	
+	e_out << 
+		"image_width: " << resolution_x << "\n" << 
+		"image_height: " << resolution_y << "\n" << 
+		"camera_name: endo_cam_l\ncamera_matrix:\n  rows: 3\n  cols: 3\n" <<
+		"  data: [" << fx << ", 0.0, " << cx << ", 0.0, " << fy << ", " << cy <<", 0.0, 0.0, 1.0]\n" <<
+		"distortion_model: plumb_bob\ndistortion_coefficients:\n  rows: 1\n  cols: 14\n" <<
+		"  data: [" << k1<< ", " << k2 << ", " << p1 << ", " << p2 << ", " << k3 << ", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]\n" <<
+		"rectification_matrix:\n  rows: 3\n  cols: 3\n  data: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\n" <<
+		"projection_matrix:\n  rows: 3\n  cols: 4\n" <<
+		"  data: [" << fx <<", 0.0, " << cx << ", 0.0, 0.0, " << fy << ", " << cy << ", 0.0, 0.0, 0.0, 1.0, 0.0]"
+	;
+
 	e_out.close();
+	
 	printf("\nSaved results to %s.\n\n\n", output);
 	
 	if(position != NULL){

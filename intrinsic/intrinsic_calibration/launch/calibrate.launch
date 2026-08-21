@@ -21,12 +21,12 @@
 	/>
 	<arg
 		name="output"
-		default=""
+		default="/dev/null"
 		doc="Output file for finished calibration."
 	/>
 	<arg
 		name="position"
-		default=""
+		default="/dev/null"
 		doc="Output file for camera location w.r.t. stand."
 	/>
 	

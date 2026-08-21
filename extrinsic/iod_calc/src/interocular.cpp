@@ -63,38 +63,73 @@ void mat_to_rpw(Eigen::Vector3d & rpw, const Eigen::Affine3d & mat){//TODO Appar
 int main(int argc, char** argv){
 	YAML::Node l_camera;
 	YAML::Node r_camera;
+	printf("Loading right intrinsic file %s\n", argv[3]);
 	r_camera = YAML::LoadFile(argv[3]);
+	printf("Loading left intrinsic file %s\n", argv[1]);
 	l_camera = YAML::LoadFile(argv[1]);
 	
+	
+	double fx_l, fy_l, cx_l, cy_l;
+	double k1_l, k2_l, k3_l, p1_l, p2_l;
+	double fx_r, fy_r, cx_r, cy_r;
+	double k1_r, k2_r, k3_r, p1_r, p2_r;
+	try{
+		fx_l = l_camera["camera_matrix"]["data"][0].as<double>();
+		fy_l = l_camera["camera_matrix"]["data"][4].as<double>();
+		cx_l = l_camera["camera_matrix"]["data"][2].as<double>();
+		cy_l = l_camera["camera_matrix"]["data"][5].as<double>();
+		
+		k1_l = l_camera["distortion_coefficients"]["data"][0].as<double>();
+		k2_l = l_camera["distortion_coefficients"]["data"][1].as<double>();
+		k3_l = l_camera["distortion_coefficients"]["data"][4].as<double>();
+		p1_l = l_camera["distortion_coefficients"]["data"][2].as<double>();
+		p2_l = l_camera["distortion_coefficients"]["data"][3].as<double>();
+		
+	} catch(YAML::RepresentationException e){
+		printf("\e[39mLeft Intrinsic parse exception \"%s\".\e[31m\n", e.what());
+		return 0;
+	}
+	printf("Successfully initialized left intrinsics from %s.\n", argv[1]);
+	
+	try{
+		fx_r = r_camera["camera_matrix"]["data"][0].as<double>();
+		fy_r = r_camera["camera_matrix"]["data"][4].as<double>();
+		cx_r = r_camera["camera_matrix"]["data"][2].as<double>();
+		cy_r = r_camera["camera_matrix"]["data"][5].as<double>();
+		
+		k1_r = r_camera["distortion_coefficients"]["data"][0].as<double>();
+		k2_r = r_camera["distortion_coefficients"]["data"][1].as<double>();
+		k3_r = r_camera["distortion_coefficients"]["data"][4].as<double>();
+		p1_r = r_camera["distortion_coefficients"]["data"][2].as<double>();
+		p2_r = r_camera["distortion_coefficients"]["data"][3].as<double>();
+		
+	} catch(YAML::RepresentationException e){
+		printf("\e[39mRight Intrinsic parse exception \"%s\".\e[31m\n", e.what());
+		return 0;
+	}
+	printf("Successfully initialized right intrinsics from %s.\n", argv[1]);
+	
 	cv::Mat INTRENSIC_L = (cv::Mat_<double>(3, 3) <<
-		l_camera["fx"].as<double>(), 0.0, l_camera["cx"].as<double>(),
-		0.0, l_camera["fy"].as<double>(), l_camera["cy"].as<double>(), 
+		fx_l, 0.0, cx_l,
+		0.0, fy_l, cy_l, 
 		0.0,0.0, 1.0
 	);
 	std::cout << "Left intrinsics: \n" << INTRENSIC_L << "\n";
 	
 	cv::Mat INTRENSIC_R = (cv::Mat_<double>(3, 3) <<
-		r_camera["fx"].as<double>(), 0.0, r_camera["cx"].as<double>(),
-		0.0, r_camera["fy"].as<double>(), r_camera["cy"].as<double>(), 
+		fx_r, 0.0, cx_r,
+		0.0, fy_r, cy_r, 
 		0.0,0.0, 1.0
 	);
 	std::cout << "Right intrinsics: \n" << INTRENSIC_R << "\n";
 	
 	cv::Mat DISTORTION_L = (cv::Mat_<double>(1, 5) <<
-		l_camera["k1"].as<double>(),
-		l_camera["k2"].as<double>(),
-		l_camera["p1"].as<double>(),
-		l_camera["p2"].as<double>(),
-		l_camera["k3"].as<double>()
+		k1_l, k2_l, p1_l, p2_l, k3_l
 	);
 	std::cout << "Left distortion: \n" << DISTORTION_L << "\n";
 	
 	cv::Mat DISTORTION_R = (cv::Mat_<double>(1, 5) <<
-		r_camera["k1"].as<double>(),
-		r_camera["k2"].as<double>(),
-		r_camera["p1"].as<double>(),
-		r_camera["p2"].as<double>(),
-		r_camera["k3"].as<double>()
+		k1_r, k2_r, p1_r, p2_r, k3_r
 	);
 	std::cout << "Right distortion: \n" << DISTORTION_R << "\n";
 	
@@ -263,7 +298,7 @@ int main(int argc, char** argv){
 	fout << "  data: [" << mat_to_linear(PROJECTION_R) << "]\n";
 	fout.close();
 	
-	fout = std::ofstream(argv[7]);
+	fout = std::ofstream(argv[5]);
 	fout << "matrix: [" << mat_to_linear(L_to_R.matrix()) << "]\n";
 	fout << "ros_x: " << L_to_R.translation().x() << "\n";
 	fout << "ros_y: " << L_to_R.translation().y() << "\n";
@@ -272,6 +307,8 @@ int main(int argc, char** argv){
 	fout << "ros_p: " << rpw.y() << "\n";
 	fout << "ros_w: " << rpw.z() << "\n";
 	fout.close();
+
+	//TODO Dafuq is all this?
 
 	/*for(int i = 1; i < 17; i++){
 		printf("%s\n", argv[LCONST + i]);
